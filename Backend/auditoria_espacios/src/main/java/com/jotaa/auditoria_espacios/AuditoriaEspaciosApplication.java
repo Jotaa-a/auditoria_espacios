@@ -8,6 +8,7 @@ public class AuditoriaEspaciosApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(AuditoriaEspaciosApplication.class, args);
+		System.out.println("melani");
 	}
 
 }
