@@ -1,0 +1,288 @@
+
+/* =========================
+   CONFIGURACIÓN GENERAL
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    font-family: 'Segoe UI', Arial, sans-serif;
+
+    /* IMAGEN DE FONDO PRINCIPAL */
+    background-image:
+        linear-gradient(
+            rgba(66, 41, 21, 0.7),
+            rgba(38, 21, 66, 0.7)
+        ),
+        url("Img/fondo_login.png");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* =========================
+   CONTENEDOR
+========================= */
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 16px;
+    
+}
+
+/* =========================
+   TARJETA LOGIN
+========================= */
+
+.login-card {
+    width: 100%;
+    max-width: 600px;
+    min-height: 600px; /* Altura mínima */
+    background: #faf8fc;
+    box-shadow: 0 20px 60px rgba(132, 34, 218, 0.32);
+    overflow: hidden;
+     border-radius: 18px;
+}
+
+/* =========================
+    BANNER LOGIN
+========================= */
+
+.login-banner {
+    /* Tamano de la animacion: minimo, adaptable, maximo. */
+    --animation-size: clamp(280px, 75vw, 480px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 320px;
+    overflow: hidden;
+
+    /* Color mientras no agregas imagen */
+    background-color: #654477;
+}
+
+/* =========================
+   ANIMACION DEL LOGIN
+   Ajusta --animation-size en .login-banner para cambiar su tamano.
+========================= */
+
+#login-animation {
+    width: min(100%, var(--animation-size));
+    height: auto;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    transform: translateY(-30px);
+}
+
+#login-animation svg {
+    display: block;
+}
+
+/* =========================
+   CONTENIDO
+========================= */
+
+.login-content {
+    padding: 40px 36px 48px; /* Mas espacio para el formulario */
+    text-align: center;
+}
+
+.login-content h1 {
+  font-family: "Bruno Ace", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+    color: #292232;
+    margin-bottom: 6px;
+
+}
+
+.subtitle {
+    font-family: "Bruno Ace", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+    color: #83788a;
+    margin-bottom: 28px;
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+.input-group {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    height: 50px;
+
+    background: #457869;
+    border-radius: 25px;
+
+    margin-bottom: 20px;
+    padding: 0 15px;
+
+    transition: 0.3s;
+    
+}
+
+.input-group:focus-within {
+    background: #582480;
+    box-shadow: 0 0 0 6px rgba(153, 16, 132, 0.17);
+}
+
+.input-icon {
+    color: white;
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.input-group input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+
+    color: white;
+  font-family: "Quantico", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.95);
+    
+}
+
+/* =========================
+   OPCIONES DEL LOGIN
+========================= */
+
+.login-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin: 20px 0;
+    gap: 10px;
+}
+
+.remember {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    font-size: 11px;
+    color: #65576b;
+    cursor: pointer;
+}
+
+.remember input {
+    accent-color: #754383;
+    cursor: pointer;
+}
+
+.forgot-password {
+    font-size: 11px;
+    color: #754383;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   BOTÓN LOGIN
+========================= */
+
+.login-btn {
+    width: 100%;
+    height: 42px;
+
+    border: none;
+    background: #794584;
+
+    color: white;
+  font-family: "Quantico", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+    letter-spacing: 1px;
+
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-btn:hover {
+    background: #5b316c;
+    transform: translateY(-2px);
+}
+
+/* =========================
+   MENSAJES
+========================= */
+
+.mensaje {
+    font-size: 12px;
+    margin-top: 12px;
+    color: #a23856;
+}
+
+.mensaje:empty {
+    display: none;
+}
+
+/* =========================
+   PIE DE LOGIN
+========================= */
+
+.login-footer {
+    margin-top: 25px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #877a91;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 480px) {
+
+    .login-card {
+        max-width: 350px;
+    }
+
+    .login-banner {
+        /* Tamano para celulares; conserva la proporcion cuadrada. */
+        --animation-size: clamp(220px, 75vw, 280px);
+        height: 230px;
+    }
+
+    .login-content {
+        padding: 32px 24px 36px;
+    }
+
+    .login-content h1 {
+        font-size: 25px;
+    }
+
+    .login-options {
+        gap: 8px;
+    }
+
+    .forgot-password,
+    .remember {
+        font-size: 10px;
+    }
+
+}
