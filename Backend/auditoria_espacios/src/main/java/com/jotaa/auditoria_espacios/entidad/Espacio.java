@@ -11,12 +11,12 @@ import lombok.Setter;
 public class Espacio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false, length = 80)
     private String nombre;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
+    @JoinColumn(name = "representante_id")
     private Usuario representante;
 }
