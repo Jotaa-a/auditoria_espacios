@@ -18,6 +18,10 @@ public class InspeccionDetalle {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "inspeccion_id", nullable = false)
+    private Inspeccion inspeccion;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "puesto_id", nullable = false)
     private PuestoTrabajo puesto;
 
