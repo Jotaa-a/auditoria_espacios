@@ -35,6 +35,10 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Datos inválidos");
         pd.setProperty("errores", errores);
         return pd;
+    }
 
+    @ExceptionHandler(SolicitudInvalidaException.class)
+    public ProblemDetail solicitudInvalida(SolicitudInvalidaException ex){
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

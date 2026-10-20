@@ -10,4 +10,5 @@ import java.util.List;
 public interface PuestoTrabajoRepository extends JpaRepository<PuestoTrabajo, Long> {
     List<PuestoTrabajo> findByEspacioId(Long espacioId);
     boolean existsByEspacioIdAndCodigo(Long espacioId, String codigo);
+    long countByEspacioIdAndActivoTrue(Long espacioId);
 }
