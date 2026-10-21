@@ -1,0 +1,119 @@
+### 1. Crear inspección (esperado: 201, estado BORRADOR, puestosTotales 2)
+POST http://localhost:8080/api/inspecciones
+Content-Type: application/json
+
+{"espacioId":1,"tipo":"VIERNES_ENTREGA","fecha":"2026-10-23","inspectorId":1}
+
+### 2. Repetir la misma (esperado: 409)
+POST http://localhost:8080/api/inspecciones
+Content-Type: application/json
+
+{"espacioId":1,"tipo":"VIERNES_ENTREGA","fecha":"2026-10-23","inspectorId":1}
+
+### 3. Puesto 1 OK (esperado: 200)
+PUT http://localhost:8080/api/inspecciones/1/puestos/1
+Content-Type: application/json
+
+{"resultado":"OK"}
+
+### 4. Cerrar con un puesto pendiente (esperado: 409 "Faltan 1 puestos")
+POST http://localhost:8080/api/inspecciones/1/cerrar
+
+### 5. OK con hallazgos (esperado: 400)
+PUT http://localhost:8080/api/inspecciones/1/puestos/1
+Content-Type: application/json
+
+{"resultado":"OK","hallazgos":[{"tipoHallazgoId":1}]}
+
+### 6. CON_NOVEDADES sin hallazgos (esperado: 400)
+PUT http://localhost:8080/api/inspecciones/1/puestos/2
+Content-Type: application/json
+
+{"resultado":"CON_NOVEDADES"}
+
+### 7. Componente de otro puesto (esperado: 400)
+PUT http://localhost:8080/api/inspecciones/1/puestos/2
+Content-Type: application/json
+
+{"resultado":"CON_NOVEDADES","hallazgos":[{"tipoHallazgoId":5,"componenteId":2}]}
+
+### 8. Daño físico sin gravedad (esperado: 400)
+PUT http://localhost:8080/api/inspecciones/1/puestos/2
+Content-Type: application/json
+
+{"resultado":"CON_NOVEDADES","hallazgos":[{"tipoHallazgoId":8,"componenteId":6}]}
+
+### 9. Puesto 2 válido (esperado: 200, anota el id del hallazgo de daño)
+PUT http://localhost:8080/api/inspecciones/1/puestos/2
+Content-Type: application/json
+
+{"resultado":"CON_NOVEDADES","hallazgos":[
+  {"tipoHallazgoId":1},
+  {"tipoHallazgoId":8,"componenteId":6,"gravedad":"GRAVE","descripcion":"Pantalla con la esquina rota"}]}
+
+### 10. Subir foto al hallazgo de daño (esperado: 201). Cambia el 2 por el id real
+POST http://localhost:8080/api/hallazgos/2/evidencias
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="archivo"; filename="foto.jpg"
+Content-Type: image/jpeg
+
+< ./foto.jpg
+--WebAppBoundary--
+
+### 11. Subir un PDF (esperado: 400)
+POST http://localhost:8080/api/hallazgos/2/evidencias
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="archivo"; filename="documento.pdf"
+Content-Type: application/pdf
+
+< ./documento.pdf
+--WebAppBoundary--
+
+### 12. Cerrar (esperado: 200, estado CERRADA)
+POST http://localhost:8080/api/inspecciones/1/cerrar
+
+### 13. Modificar una inspección cerrada (esperado: 409)
+PUT http://localhost:8080/api/inspecciones/1/puestos/1
+Content-Type: application/json
+
+{"resultado":"OK"}
+
+### 14. Reporte automático (esperado: 1 reporte ABIERTO, GRAVE, con 1 evidencia)
+GET http://localhost:8080/api/reportes-dano?estado=ABIERTO
+
+### 15. Avanzar estado (esperado: 200)
+PATCH http://localhost:8080/api/reportes-dano/1/estado
+Content-Type: application/json
+
+{"estado":"EN_REVISION"}
+
+### 16. Retroceder (esperado: 409)
+PATCH http://localhost:8080/api/reportes-dano/1/estado
+Content-Type: application/json
+
+{"estado":"ABIERTO"}
+
+### 17. Resolver (esperado: 200, con resueltoEn lleno)
+PATCH http://localhost:8080/api/reportes-dano/1/estado
+Content-Type: application/json
+
+{"estado":"RESUELTO"}
+
+### 18. Errores del CRUD base
+POST http://localhost:8080/api/espacios
+Content-Type: application/json
+
+{"nombre":"Salón 1"}
+
+###
+POST http://localhost:8080/api/espacios
+Content-Type: application/json
+
+{"nombre":""}
+
+###
+GET http://localhost:8080/api/espacios/999

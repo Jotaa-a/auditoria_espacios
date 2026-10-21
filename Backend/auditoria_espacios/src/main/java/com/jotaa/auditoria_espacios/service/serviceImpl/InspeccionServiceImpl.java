@@ -6,6 +6,7 @@ import com.jotaa.auditoria_espacios.dto.request.InspeccionRequest;
 import com.jotaa.auditoria_espacios.dto.response.DetalleResponse;
 import com.jotaa.auditoria_espacios.dto.response.InspeccionResponse;
 import com.jotaa.auditoria_espacios.entidad.*;
+import com.jotaa.auditoria_espacios.entidad.enumerated.Categoria;
 import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoInspeccion;
 import com.jotaa.auditoria_espacios.entidad.enumerated.Resultado;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
@@ -31,6 +32,8 @@ public class InspeccionServiceImpl implements InspeccionService {
     private final ComponenteRepository componenteRepo;
     private final UsuarioRepository usuarioRepo;
     private final TipoHallazgoRepository tipoRepo;
+    private final ReporteDanoRepository reporteRepo;
+    private final EvidenciaRepository evidenciaRepo;
 
     @Override
     @Transactional
@@ -102,6 +105,11 @@ public class InspeccionServiceImpl implements InspeccionService {
                 && (hr.descripcion() == null || hr.descripcion().isBlank()))
                     throw new SolicitudInvalidaException("El hallazgo de tipo OTRO requiere una descipcion");
 
+            if (tipo.getCategoria() == Categoria.DANO_FISICO
+                    && (hr.componenteId() == null || hr.gravedad() == null))
+                throw new SolicitudInvalidaException(
+                        "Un hallazgo de daño físico debe indicar el componente afectado y la gravedad");
+
             Componente comp = null;
             if (hr.componenteId() != null) {
                 comp = componenteRepo.findById(hr.componenteId())
@@ -116,6 +124,7 @@ public class InspeccionServiceImpl implements InspeccionService {
             h.setTipoHallazgo(tipo);
             h.setComponente(comp);
             h.setDescripcion(hr.descripcion());
+            h.setGravedad(hr.gravedad());
             d.getHallazgos().add(h);
         }
         return DetalleResponse.from(detalleRepo.save(d));
@@ -130,6 +139,21 @@ public class InspeccionServiceImpl implements InspeccionService {
         long registrados = detalleRepo.countByInspeccionId(id);
         if (registrados < total)
             throw new ConflictoException("Faltan " + (total - registrados) + " puestos por registrar");
+
+        for (InspeccionDetalle d : detalleRepo.findByInspeccionId(id)) {
+            for (Hallazgo h : d.getHallazgos()) {
+                if (h.getTipoHallazgo().getCategoria() != Categoria.DANO_FISICO) continue;
+                ReporteDano r = new ReporteDano();
+                r.setComponente(h.getComponente());
+                r.setReportadoPor(insp.getInspector());
+                r.setInspeccion(insp);
+                r.setDescripcion(h.getDescripcion() != null && !h.getDescripcion().isBlank()
+                        ? h.getDescripcion() : h.getTipoHallazgo().getNombre());
+                r.setGravedad(h.getGravedad());
+                reporteRepo.save(r);
+                evidenciaRepo.findByHallazgoId(h.getId()).forEach(ev -> ev.setReporte(r));
+            }
+        }
         insp.setEstado(EstadoInspeccion.CERRADA);
         return toResponse(insp, true);
     }
