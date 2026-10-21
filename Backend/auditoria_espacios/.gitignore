@@ -35,3 +35,6 @@ build/
 ### sensible data ###
 .env
 ca.pem
+
+### uploads data ###
+uploads/

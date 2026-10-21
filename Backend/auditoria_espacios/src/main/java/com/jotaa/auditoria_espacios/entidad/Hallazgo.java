@@ -1,5 +1,6 @@
 package com.jotaa.auditoria_espacios.entidad;
 
+import com.jotaa.auditoria_espacios.entidad.enumerated.Gravedad;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,4 +27,7 @@ public class Hallazgo {
 
     @Column(length = 500)
     private String descripcion;
+
+    @Enumerated(EnumType.STRING)
+    private Gravedad gravedad;
 }
