@@ -1,14 +1,14 @@
 package com.jotaa.auditoria_espacios.service.serviceImpl;
 
 import com.jotaa.auditoria_espacios.dto.response.*;
-import com.jotaa.auditoria_espacios.entidad.Hallazgo;
-import com.jotaa.auditoria_espacios.entidad.Inspeccion;
-import com.jotaa.auditoria_espacios.entidad.InspeccionDetalle;
-import com.jotaa.auditoria_espacios.entidad.PuestoTrabajo;
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoComparacion;
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoInspeccion;
-import com.jotaa.auditoria_espacios.entidad.enumerated.Resultado;
-import com.jotaa.auditoria_espacios.entidad.enumerated.TipoInspeccion;
+import com.jotaa.auditoria_espacios.entity.Hallazgo;
+import com.jotaa.auditoria_espacios.entity.Inspeccion;
+import com.jotaa.auditoria_espacios.entity.InspeccionDetalle;
+import com.jotaa.auditoria_espacios.entity.PuestoTrabajo;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoComparacion;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoInspeccion;
+import com.jotaa.auditoria_espacios.entity.enumerated.Resultado;
+import com.jotaa.auditoria_espacios.entity.enumerated.TipoInspeccion;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.exception.SolicitudInvalidaException;

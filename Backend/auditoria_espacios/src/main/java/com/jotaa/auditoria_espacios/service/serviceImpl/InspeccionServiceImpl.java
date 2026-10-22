@@ -1,14 +1,15 @@
 package com.jotaa.auditoria_espacios.service.serviceImpl;
 
+import com.jotaa.auditoria_espacios.configuration.UsuarioActual;
 import com.jotaa.auditoria_espacios.dto.request.DetallePuestoRequest;
 import com.jotaa.auditoria_espacios.dto.request.HallazgoRequest;
 import com.jotaa.auditoria_espacios.dto.request.InspeccionRequest;
 import com.jotaa.auditoria_espacios.dto.response.DetalleResponse;
 import com.jotaa.auditoria_espacios.dto.response.InspeccionResponse;
-import com.jotaa.auditoria_espacios.entidad.*;
-import com.jotaa.auditoria_espacios.entidad.enumerated.Categoria;
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoInspeccion;
-import com.jotaa.auditoria_espacios.entidad.enumerated.Resultado;
+import com.jotaa.auditoria_espacios.entity.*;
+import com.jotaa.auditoria_espacios.entity.enumerated.Categoria;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoInspeccion;
+import com.jotaa.auditoria_espacios.entity.enumerated.Resultado;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.exception.SolicitudInvalidaException;
@@ -34,14 +35,14 @@ public class InspeccionServiceImpl implements InspeccionService {
     private final TipoHallazgoRepository tipoRepo;
     private final ReporteDanoRepository reporteRepo;
     private final EvidenciaRepository evidenciaRepo;
+    private final UsuarioActual usuarioActual;
 
     @Override
     @Transactional
     public InspeccionResponse crear(InspeccionRequest req) {
         Espacio espacio = espacioRepo.findById(req.espacioId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Espacio no encontrado: " + req.espacioId()));
-        Usuario inspector = usuarioRepo.findById(req.inspectorId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Inspector no encontrado: " + req.inspectorId()));
+        Usuario inspector = usuarioActual.obtener();
         if (inspeccionRepo.existsByEspacioIdAndTipoAndFecha(req.espacioId(), req.tipo(), req.fecha()))
             throw new ConflictoException("Ya existe una inspeccion de ese tipo para el espacio en esa fecha");
 

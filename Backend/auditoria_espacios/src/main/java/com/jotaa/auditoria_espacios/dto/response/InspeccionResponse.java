@@ -1,7 +1,7 @@
 package com.jotaa.auditoria_espacios.dto.response;
 
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoInspeccion;
-import com.jotaa.auditoria_espacios.entidad.enumerated.TipoInspeccion;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoInspeccion;
+import com.jotaa.auditoria_espacios.entity.enumerated.TipoInspeccion;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

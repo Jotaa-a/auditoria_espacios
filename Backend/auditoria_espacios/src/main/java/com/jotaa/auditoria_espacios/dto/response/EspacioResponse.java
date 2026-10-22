@@ -1,7 +1,7 @@
 package com.jotaa.auditoria_espacios.dto.response;
 
-import com.jotaa.auditoria_espacios.entidad.Espacio;
-import com.jotaa.auditoria_espacios.entidad.Usuario;
+import com.jotaa.auditoria_espacios.entity.Espacio;
+import com.jotaa.auditoria_espacios.entity.Usuario;
 
 public record EspacioResponse(
         Long id, String nombre, Long representanteId, String representanteNombre

@@ -1,8 +1,8 @@
 package com.jotaa.auditoria_espacios.repository;
 
-import com.jotaa.auditoria_espacios.entidad.Inspeccion;
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoInspeccion;
-import com.jotaa.auditoria_espacios.entidad.enumerated.TipoInspeccion;
+import com.jotaa.auditoria_espacios.entity.Inspeccion;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoInspeccion;
+import com.jotaa.auditoria_espacios.entity.enumerated.TipoInspeccion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

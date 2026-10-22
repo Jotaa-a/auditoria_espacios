@@ -4,7 +4,7 @@ import com.jotaa.auditoria_espacios.dto.request.DetallePuestoRequest;
 import com.jotaa.auditoria_espacios.dto.request.InspeccionRequest;
 import com.jotaa.auditoria_espacios.dto.response.DetalleResponse;
 import com.jotaa.auditoria_espacios.dto.response.InspeccionResponse;
-import com.jotaa.auditoria_espacios.entidad.Inspeccion;
+import com.jotaa.auditoria_espacios.entity.Inspeccion;
 
 import java.time.LocalDate;
 import java.util.List;

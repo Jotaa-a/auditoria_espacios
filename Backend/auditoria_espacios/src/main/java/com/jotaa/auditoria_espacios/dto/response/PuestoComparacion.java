@@ -1,7 +1,7 @@
 package com.jotaa.auditoria_espacios.dto.response;
 
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoComparacion;
-import com.jotaa.auditoria_espacios.entidad.enumerated.Resultado;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoComparacion;
+import com.jotaa.auditoria_espacios.entity.enumerated.Resultado;
 
 import java.util.List;
 

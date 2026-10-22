@@ -1,8 +1,8 @@
 package com.jotaa.auditoria_espacios.dto.response;
 
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoReporte;
-import com.jotaa.auditoria_espacios.entidad.enumerated.Gravedad;
-import com.jotaa.auditoria_espacios.entidad.enumerated.TipoComponente;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoReporte;
+import com.jotaa.auditoria_espacios.entity.enumerated.Gravedad;
+import com.jotaa.auditoria_espacios.entity.enumerated.TipoComponente;
 
 import java.time.LocalDateTime;
 import java.util.List;

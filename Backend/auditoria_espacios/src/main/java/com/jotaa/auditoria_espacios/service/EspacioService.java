@@ -2,7 +2,7 @@ package com.jotaa.auditoria_espacios.service;
 
 import com.jotaa.auditoria_espacios.dto.request.EspacioRequest;
 import com.jotaa.auditoria_espacios.dto.response.EspacioResponse;
-import com.jotaa.auditoria_espacios.entidad.Espacio;
+import com.jotaa.auditoria_espacios.entity.Espacio;
 
 import java.util.List;
 

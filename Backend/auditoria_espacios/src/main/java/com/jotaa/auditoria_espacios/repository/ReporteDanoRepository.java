@@ -1,7 +1,7 @@
 package com.jotaa.auditoria_espacios.repository;
 
-import com.jotaa.auditoria_espacios.entidad.ReporteDano;
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoReporte;
+import com.jotaa.auditoria_espacios.entity.ReporteDano;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoReporte;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

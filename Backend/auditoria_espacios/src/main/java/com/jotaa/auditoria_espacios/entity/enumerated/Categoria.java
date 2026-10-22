@@ -1,4 +1,4 @@
-package com.jotaa.auditoria_espacios.entidad.enumerated;
+package com.jotaa.auditoria_espacios.entity.enumerated;
 
 public enum Categoria {
     LIMPIEZA,

@@ -3,7 +3,7 @@ package com.jotaa.auditoria_espacios.controller;
 import com.jotaa.auditoria_espacios.dto.request.EstadoReporteRequest;
 import com.jotaa.auditoria_espacios.dto.request.ReporteRequest;
 import com.jotaa.auditoria_espacios.dto.response.ReporteResponse;
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoReporte;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoReporte;
 import com.jotaa.auditoria_espacios.service.ReporteDanoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

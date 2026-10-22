@@ -1,6 +1,6 @@
 package com.jotaa.auditoria_espacios.dto.request;
 
-import com.jotaa.auditoria_espacios.entidad.enumerated.Resultado;
+import com.jotaa.auditoria_espacios.entity.enumerated.Resultado;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 

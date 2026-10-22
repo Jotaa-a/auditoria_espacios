@@ -1,6 +1,6 @@
-package com.jotaa.auditoria_espacios.entidad;
+package com.jotaa.auditoria_espacios.entity;
 
-import com.jotaa.auditoria_espacios.entidad.enumerated.TipoComponente;
+import com.jotaa.auditoria_espacios.entity.enumerated.TipoComponente;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

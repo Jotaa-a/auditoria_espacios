@@ -1,6 +1,6 @@
-package com.jotaa.auditoria_espacios.entidad;
+package com.jotaa.auditoria_espacios.entity;
 
-import com.jotaa.auditoria_espacios.entidad.enumerated.Rol;
+import com.jotaa.auditoria_espacios.entity.enumerated.Rol;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +21,7 @@ public class Usuario {
     private String correo;
 
     @Column(name = "password_hash", nullable = false, length = 255)
-    private String password;
+    private String passwordHash;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

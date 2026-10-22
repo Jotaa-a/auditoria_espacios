@@ -1,0 +1,88 @@
+package com.jotaa.auditoria_espacios.service.serviceImpl;
+
+import com.jotaa.auditoria_espacios.configuration.UsuarioActual;
+import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordRequest;
+import com.jotaa.auditoria_espacios.dto.request.UsuarioActualizarRequest;
+import com.jotaa.auditoria_espacios.dto.request.UsuarioCrearRequest;
+import com.jotaa.auditoria_espacios.dto.response.UsuarioResponse;
+import com.jotaa.auditoria_espacios.entity.Usuario;
+import com.jotaa.auditoria_espacios.entity.enumerated.Rol;
+import com.jotaa.auditoria_espacios.exception.ConflictoException;
+import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
+import com.jotaa.auditoria_espacios.repository.UsuarioRepository;
+import com.jotaa.auditoria_espacios.service.UsuarioService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Locale;
+
+@Service
+@RequiredArgsConstructor
+public class UsuarioServiceRequest implements UsuarioService {
+
+    private final UsuarioRepository usuarioRepo;
+    private final PasswordEncoder encoder;
+    private final UsuarioActual usuarioActual;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UsuarioResponse> listar() {
+        return usuarioRepo.findAll().stream().map(UsuarioResponse::from).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UsuarioResponse obtener(Long id) {
+        return UsuarioResponse.from(buscar(id));
+    }
+
+    @Override
+    public UsuarioResponse crear(UsuarioCrearRequest req) {
+        String correo = normalizar(req.correo());
+        if (usuarioRepo.existsByCorreo(correo))
+            throw new ConflictoException("Ya existe un usuario con ese correo");
+        Usuario u = new Usuario();
+        u.setNombre(req.nombre());
+        u.setCorreo(req.correo());
+        u.setPasswordHash(req.password());
+        u.setRol(req.rol());
+        u.setActivo(true);
+        return UsuarioResponse.from(usuarioRepo.save(u));
+    }
+
+    @Override
+    @Transactional
+    public UsuarioResponse actualizar(Long id, UsuarioActualizarRequest req) {
+        Usuario u = buscar(id);
+        String correo = normalizar(req.correo());
+        if (!u.getCorreo().equals(correo) && usuarioRepo.existsByCorreo(correo))
+            throw new ConflictoException("Ya existe un usuario con ese correo");
+        if (usuarioActual.obtener().getId().equals(id)
+            && (!req.activo() || req.rol() != Rol.ADMIN))
+            throw new ConflictoException(
+                    "No puedes desactivarte ni quitarte el rol de administrador a ti mismo"
+            );
+        u.setNombre(req.nombre());
+        u.setCorreo(req.correo());
+        u.setRol(req.rol());
+        u.setActivo(req.activo());
+        return UsuarioResponse.from(u);
+    }
+
+    @Override
+    public void cambiarPassword(Long id, CambiarPasswordRequest req) {
+        buscar(id).setPasswordHash(encoder.encode(req.password()));
+    }
+
+    private Usuario buscar(Long id){
+        return usuarioRepo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado: " + id));
+    }
+
+    private String normalizar(String correo){
+        return correo.trim().toLowerCase();
+    }
+}

@@ -2,8 +2,8 @@ package com.jotaa.auditoria_espacios.service.serviceImpl;
 
 import com.jotaa.auditoria_espacios.dto.request.PuestoRequest;
 import com.jotaa.auditoria_espacios.dto.response.PuestoResponse;
-import com.jotaa.auditoria_espacios.entidad.Espacio;
-import com.jotaa.auditoria_espacios.entidad.PuestoTrabajo;
+import com.jotaa.auditoria_espacios.entity.Espacio;
+import com.jotaa.auditoria_espacios.entity.PuestoTrabajo;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.repository.EspacioRepository;

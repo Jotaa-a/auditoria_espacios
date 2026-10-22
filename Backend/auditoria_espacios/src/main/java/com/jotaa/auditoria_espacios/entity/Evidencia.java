@@ -1,4 +1,4 @@
-package com.jotaa.auditoria_espacios.entidad;
+package com.jotaa.auditoria_espacios.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

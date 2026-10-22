@@ -1,6 +1,6 @@
 package com.jotaa.auditoria_espacios.dto.response;
 
-import com.jotaa.auditoria_espacios.entidad.Evidencia;
+import com.jotaa.auditoria_espacios.entity.Evidencia;
 
 import java.time.LocalDateTime;
 

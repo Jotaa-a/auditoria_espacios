@@ -1,10 +1,10 @@
 package com.jotaa.auditoria_espacios.dto.response;
 
-import com.jotaa.auditoria_espacios.entidad.Componente;
-import com.jotaa.auditoria_espacios.entidad.Hallazgo;
-import com.jotaa.auditoria_espacios.entidad.enumerated.Categoria;
-import com.jotaa.auditoria_espacios.entidad.enumerated.Gravedad;
-import com.jotaa.auditoria_espacios.entidad.enumerated.TipoComponente;
+import com.jotaa.auditoria_espacios.entity.Componente;
+import com.jotaa.auditoria_espacios.entity.Hallazgo;
+import com.jotaa.auditoria_espacios.entity.enumerated.Categoria;
+import com.jotaa.auditoria_espacios.entity.enumerated.Gravedad;
+import com.jotaa.auditoria_espacios.entity.enumerated.TipoComponente;
 
 public record HallazgoResponse(
         Long id, Long tipoHallazgo, String tipoCodigo, String tipoNombre,

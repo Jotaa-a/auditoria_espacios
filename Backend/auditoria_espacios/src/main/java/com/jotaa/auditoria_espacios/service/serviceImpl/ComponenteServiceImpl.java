@@ -2,7 +2,7 @@ package com.jotaa.auditoria_espacios.service.serviceImpl;
 
 import com.jotaa.auditoria_espacios.dto.request.ComponenteRequest;
 import com.jotaa.auditoria_espacios.dto.response.ComponenteResponse;
-import com.jotaa.auditoria_espacios.entidad.Componente;
+import com.jotaa.auditoria_espacios.entity.Componente;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.repository.ComponenteRepository;
 import com.jotaa.auditoria_espacios.repository.PuestoTrabajoRepository;

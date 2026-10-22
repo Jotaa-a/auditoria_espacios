@@ -1,6 +1,6 @@
 package com.jotaa.auditoria_espacios.dto.request;
 
-import com.jotaa.auditoria_espacios.entidad.enumerated.TipoComponente;
+import com.jotaa.auditoria_espacios.entity.enumerated.TipoComponente;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 

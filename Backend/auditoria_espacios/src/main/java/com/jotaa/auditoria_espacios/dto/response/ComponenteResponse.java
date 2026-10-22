@@ -1,7 +1,7 @@
 package com.jotaa.auditoria_espacios.dto.response;
 
-import com.jotaa.auditoria_espacios.entidad.Componente;
-import com.jotaa.auditoria_espacios.entidad.enumerated.TipoComponente;
+import com.jotaa.auditoria_espacios.entity.Componente;
+import com.jotaa.auditoria_espacios.entity.enumerated.TipoComponente;
 
 public record ComponenteResponse(
         Long id, Long puestoId, String puestCodigo, TipoComponente tipo,

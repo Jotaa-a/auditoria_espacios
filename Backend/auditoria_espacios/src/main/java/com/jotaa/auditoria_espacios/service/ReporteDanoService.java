@@ -2,8 +2,8 @@ package com.jotaa.auditoria_espacios.service;
 
 import com.jotaa.auditoria_espacios.dto.request.ReporteRequest;
 import com.jotaa.auditoria_espacios.dto.response.ReporteResponse;
-import com.jotaa.auditoria_espacios.entidad.ReporteDano;
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoReporte;
+import com.jotaa.auditoria_espacios.entity.ReporteDano;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoReporte;
 
 import java.util.List;
 

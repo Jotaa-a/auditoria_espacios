@@ -1,6 +1,6 @@
 package com.jotaa.auditoria_espacios.dto.response;
 
-import com.jotaa.auditoria_espacios.entidad.PuestoTrabajo;
+import com.jotaa.auditoria_espacios.entity.PuestoTrabajo;
 
 public record PuestoResponse(
         Long id, Long espacioId, String espacioNombre,

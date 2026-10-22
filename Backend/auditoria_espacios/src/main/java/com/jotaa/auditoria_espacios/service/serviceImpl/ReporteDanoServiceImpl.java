@@ -1,16 +1,20 @@
 package com.jotaa.auditoria_espacios.service.serviceImpl;
 
+import com.jotaa.auditoria_espacios.configuration.UsuarioActual;
 import com.jotaa.auditoria_espacios.dto.request.ReporteRequest;
 import com.jotaa.auditoria_espacios.dto.response.EvidenciaResponse;
 import com.jotaa.auditoria_espacios.dto.response.ReporteResponse;
-import com.jotaa.auditoria_espacios.entidad.Componente;
-import com.jotaa.auditoria_espacios.entidad.ReporteDano;
-import com.jotaa.auditoria_espacios.entidad.enumerated.EstadoReporte;
+import com.jotaa.auditoria_espacios.entity.Componente;
+import com.jotaa.auditoria_espacios.entity.ReporteDano;
+import com.jotaa.auditoria_espacios.entity.Usuario;
+import com.jotaa.auditoria_espacios.entity.enumerated.EstadoReporte;
+import com.jotaa.auditoria_espacios.entity.enumerated.Rol;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.repository.*;
 import com.jotaa.auditoria_espacios.service.ReporteDanoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,24 +30,32 @@ public class ReporteDanoServiceImpl implements ReporteDanoService {
     private final UsuarioRepository usuarioRepo;
     private final InspeccionRepository inspeccionRepo;
     private final EvidenciaRepository evidenciaRepo;
+    private final UsuarioActual usuarioActual;
 
     @Override
     @Transactional
     public ReporteResponse crear(ReporteRequest req) {
+        Usuario actor = usuarioActual.obtener();
+        Componente componente = componenteRepo.findById(req.componenteId())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Componente no encontrado: " + req.componenteId()));
+
+        if (actor.getRol() == Rol.REPRESENTANTE) {
+            Usuario rep = componente.getPuesto().getEspacio().getRepresentante();
+            if (rep == null || !rep.getId().equals(actor.getId()))
+                throw new AccessDeniedException("Solo puedes reportar daños en el espacio que representas");
+        }
+
         ReporteDano r = new ReporteDano();
-        r.setComponente(componenteRepo.findById(req.componenteId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Componente no encontrado: " + req.componenteId())));
-        r.setReportadoPor(usuarioRepo.findById(req.reportadoPorId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado: " + req.reportadoPorId())));
-        if (req.inspeccionID() != null){
-            r.setInspeccion(inspeccionRepo.findById(req.inspeccionID())
-                    .orElseThrow(() -> new RecursoNoEncontradoException("Inpeccion no encontrado: " + req.inspeccionID())));
+        r.setComponente(componente);
+        r.setReportadoPor(actor);
+        if (req.inspeccionId() != null) {
+            r.setInspeccion(inspeccionRepo.findById(req.inspeccionId())
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Inspección no encontrada: " + req.inspeccionId())));
         }
         r.setDescripcion(req.descripcion());
         r.setGravedad(req.gravedad());
         return toResponse(reporteRepo.save(r));
     }
-
     @Override
     @Transactional(readOnly = true)
     public List<ReporteResponse> listar(EstadoReporte estado, Long espacioId) {
