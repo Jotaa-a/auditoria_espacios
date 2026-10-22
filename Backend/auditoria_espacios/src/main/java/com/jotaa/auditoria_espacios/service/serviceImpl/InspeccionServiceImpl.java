@@ -7,6 +7,7 @@ import com.jotaa.auditoria_espacios.dto.request.InspeccionRequest;
 import com.jotaa.auditoria_espacios.dto.response.DetalleResponse;
 import com.jotaa.auditoria_espacios.dto.response.InspeccionResponse;
 import com.jotaa.auditoria_espacios.entity.*;
+import com.jotaa.auditoria_espacios.entity.enumerated.Accion;
 import com.jotaa.auditoria_espacios.entity.enumerated.Categoria;
 import com.jotaa.auditoria_espacios.entity.enumerated.EstadoInspeccion;
 import com.jotaa.auditoria_espacios.entity.enumerated.Resultado;
@@ -14,6 +15,7 @@ import com.jotaa.auditoria_espacios.exception.ConflictoException;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.exception.SolicitudInvalidaException;
 import com.jotaa.auditoria_espacios.repository.*;
+import com.jotaa.auditoria_espacios.service.AuditoriaService;
 import com.jotaa.auditoria_espacios.service.InspeccionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +39,7 @@ public class InspeccionServiceImpl implements InspeccionService {
     private final ReporteDanoRepository reporteRepo;
     private final EvidenciaRepository evidenciaRepo;
     private final UsuarioActual usuarioActual;
+    private final AuditoriaService auditoria;
 
     @Override
     @Transactional
@@ -52,6 +56,9 @@ public class InspeccionServiceImpl implements InspeccionService {
         i.setTipo(req.tipo());
         i.setFecha(req.fecha());
         i.setObservaciones(req.observaciones());
+        auditoria.registrar(Accion.CREAR, "inspeccion", i.getId(),
+                Map.of("espacioId", req.espacioId(), "tipo", req.tipo().name(), "fecha", req.fecha().toString()));
+
         return toResponse(inspeccionRepo.save(i), true);
     }
 
@@ -128,6 +135,9 @@ public class InspeccionServiceImpl implements InspeccionService {
             h.setGravedad(hr.gravedad());
             d.getHallazgos().add(h);
         }
+
+        auditoria.registrar(Accion.REGISTRAR_PUESTO, "inspeccion", inspeccionId,
+                Map.of("puestoId", puestoId, "resultado", req.resultado().name(), "hallazgos", hs.size()));
         return DetalleResponse.from(detalleRepo.save(d));
     }
 
@@ -152,10 +162,13 @@ public class InspeccionServiceImpl implements InspeccionService {
                         ? h.getDescripcion() : h.getTipoHallazgo().getNombre());
                 r.setGravedad(h.getGravedad());
                 reporteRepo.save(r);
+                auditoria.registrar(Accion.CREAR, "reporte_dano", r.getId(),
+                        Map.of("origen", "INSPECCION", "inspeccionId", id));
                 evidenciaRepo.findByHallazgoId(h.getId()).forEach(ev -> ev.setReporte(r));
             }
         }
         insp.setEstado(EstadoInspeccion.CERRADA);
+        auditoria.registrar(Accion.CERRAR, "inspeccion", id, Map.of("puestos", registrados));
         return toResponse(insp, true);
     }
 

@@ -3,15 +3,18 @@ package com.jotaa.auditoria_espacios.service.serviceImpl;
 import com.jotaa.auditoria_espacios.dto.request.ComponenteRequest;
 import com.jotaa.auditoria_espacios.dto.response.ComponenteResponse;
 import com.jotaa.auditoria_espacios.entity.Componente;
+import com.jotaa.auditoria_espacios.entity.enumerated.Accion;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.repository.ComponenteRepository;
 import com.jotaa.auditoria_espacios.repository.PuestoTrabajoRepository;
+import com.jotaa.auditoria_espacios.service.AuditoriaService;
 import com.jotaa.auditoria_espacios.service.ComponenteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class ComponenteServiceImpl implements ComponenteService {
 
     private final ComponenteRepository componenteRepo;
     private final PuestoTrabajoRepository puestoRepo;
+    private final AuditoriaService auditoria;
 
     @Override
     @Transactional(readOnly = true)
@@ -38,6 +42,8 @@ public class ComponenteServiceImpl implements ComponenteService {
     public ComponenteResponse crear(ComponenteRequest req) {
         Componente c = new Componente();
         aplicar(c, req);
+        auditoria.registrar(Accion.CREAR, "componente", c.getId(),
+                Map.of("tipo", c.getTipo(), "puestoId", req.puestoId()));
         return ComponenteResponse.from(componenteRepo.save(c));
     }
 
@@ -45,12 +51,16 @@ public class ComponenteServiceImpl implements ComponenteService {
     public ComponenteResponse actualizar(Long id, ComponenteRequest req) {
         Componente c = buscar(id);
         aplicar(c, req);
+        auditoria.registrar(Accion.ACTUALIZAR, "componente", id,
+                Map.of("tipo", c.getTipo().name(), "puestoId", req.puestoId()));
         return ComponenteResponse.from(c);
     }
 
     @Override
     public void eliminar(Long id) {
-        componenteRepo.delete(buscar(id));
+        Componente c = buscar(id);
+        componenteRepo.delete(c);
+        auditoria.registrar(Accion.ELIMINAR, "componente", id, Map.of("tipo", c.getTipo().name()));
     }
 
     @Override

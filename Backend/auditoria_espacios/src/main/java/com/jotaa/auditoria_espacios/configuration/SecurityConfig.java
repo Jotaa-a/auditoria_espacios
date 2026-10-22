@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/reportes-dano/*/estado").hasAnyRole("ADMIN", "TECNICO")
 
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auditoria/**").hasRole("ADMIN")
                         // lo demás queda bloqueado
                         .anyRequest().denyAll())
                 .oauth2ResourceServer(o -> o.jwt(j -> j.jwtAuthenticationConverter(convertidor())));

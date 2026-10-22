@@ -3,6 +3,7 @@ package com.jotaa.auditoria_espacios.service.serviceImpl;
 import com.jotaa.auditoria_espacios.dto.response.EvidenciaResponse;
 import com.jotaa.auditoria_espacios.entity.Hallazgo;
 import com.jotaa.auditoria_espacios.entity.ReporteDano;
+import com.jotaa.auditoria_espacios.entity.enumerated.Accion;
 import com.jotaa.auditoria_espacios.entity.enumerated.EstadoInspeccion;
 import com.jotaa.auditoria_espacios.entity.Evidencia;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
@@ -11,6 +12,7 @@ import com.jotaa.auditoria_espacios.exception.SolicitudInvalidaException;
 import com.jotaa.auditoria_espacios.repository.EvidenciaRepository;
 import com.jotaa.auditoria_espacios.repository.HallazgoRepository;
 import com.jotaa.auditoria_espacios.repository.ReporteDanoRepository;
+import com.jotaa.auditoria_espacios.service.AuditoriaService;
 import com.jotaa.auditoria_espacios.service.EvidenciaService;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -41,16 +43,19 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     private final EvidenciaRepository evidenciaRepo;
     private final HallazgoRepository hallazgoRepo;
     private final ReporteDanoRepository reporteRepo;
+    private final AuditoriaService auditoria;
 
     public EvidenciaServiceImpl(@Value("${app.uploads.dir}") String dir,
                             EvidenciaRepository evidenciaRepo,
                             HallazgoRepository hallazgoRepo,
-                            ReporteDanoRepository reporteRepo) throws IOException{
+                            ReporteDanoRepository reporteRepo,
+                            AuditoriaService auditoria) throws IOException{
         this.base = Paths.get(dir).toAbsolutePath().normalize();
         Files.createDirectories(this.base);
         this.evidenciaRepo = evidenciaRepo;
         this.hallazgoRepo = hallazgoRepo;
         this.reporteRepo = reporteRepo;
+        this.auditoria = auditoria;
     }
 
     @Override
@@ -63,6 +68,7 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         Evidencia e = new Evidencia();
         e.setHallazgo(h);
         e.setRutaArchivo(almacenar(archivo));
+        auditoria.registrar(Accion.SUBIR_EVIDENCIA, "hallazgo", hallazgoId, Map.of("evidenciaId", e.getId()));
         return EvidenciaResponse.from(evidenciaRepo.save(e));
     }
 
@@ -74,6 +80,7 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         Evidencia e = new Evidencia();
         e.setReporte(r);
         e.setRutaArchivo(almacenar(archivo));
+        auditoria.registrar(Accion.SUBIR_EVIDENCIA, "reporte_dano", reporteId, Map.of("evidenciaId", e.getId()));
         return EvidenciaResponse.from(evidenciaRepo.save(e));
     }
 

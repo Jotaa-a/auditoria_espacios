@@ -7,11 +7,13 @@ import com.jotaa.auditoria_espacios.dto.response.ReporteResponse;
 import com.jotaa.auditoria_espacios.entity.Componente;
 import com.jotaa.auditoria_espacios.entity.ReporteDano;
 import com.jotaa.auditoria_espacios.entity.Usuario;
+import com.jotaa.auditoria_espacios.entity.enumerated.Accion;
 import com.jotaa.auditoria_espacios.entity.enumerated.EstadoReporte;
 import com.jotaa.auditoria_espacios.entity.enumerated.Rol;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.repository.*;
+import com.jotaa.auditoria_espacios.service.AuditoriaService;
 import com.jotaa.auditoria_espacios.service.ReporteDanoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,7 @@ public class ReporteDanoServiceImpl implements ReporteDanoService {
     private final InspeccionRepository inspeccionRepo;
     private final EvidenciaRepository evidenciaRepo;
     private final UsuarioActual usuarioActual;
+    private final AuditoriaService auditoria;
 
     @Override
     @Transactional
@@ -54,6 +58,9 @@ public class ReporteDanoServiceImpl implements ReporteDanoService {
         }
         r.setDescripcion(req.descripcion());
         r.setGravedad(req.gravedad());
+        auditoria.registrar(Accion.CREAR, "reporte_dano", r.getId(),
+                Map.of("origen", "MANUAL", "componenteId", req.componenteId(), "gravedad", req.gravedad().name()));
+
         return toResponse(reporteRepo.save(r));
     }
     @Override
@@ -70,6 +77,10 @@ public class ReporteDanoServiceImpl implements ReporteDanoService {
             throw new ConflictoException("No se puede pasar de " + r.getEstado() + " a " + nuevo);
         r.setEstado(nuevo);
         if (nuevo == EstadoReporte.RESUELTO) r.setResueltoEn(LocalDateTime.now());
+        EstadoReporte anterior = r.getEstado();
+        r.setEstado(nuevo);
+        auditoria.registrar(Accion.CAMBIAR_ESTADO, "reporte_dano", id,
+                Map.of("de", anterior.name(), "a", nuevo.name()));
         return toResponse(r);
     }
 

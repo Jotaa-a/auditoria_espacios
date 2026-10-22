@@ -6,10 +6,12 @@ import com.jotaa.auditoria_espacios.dto.request.UsuarioActualizarRequest;
 import com.jotaa.auditoria_espacios.dto.request.UsuarioCrearRequest;
 import com.jotaa.auditoria_espacios.dto.response.UsuarioResponse;
 import com.jotaa.auditoria_espacios.entity.Usuario;
+import com.jotaa.auditoria_espacios.entity.enumerated.Accion;
 import com.jotaa.auditoria_espacios.entity.enumerated.Rol;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.repository.UsuarioRepository;
+import com.jotaa.auditoria_espacios.service.AuditoriaService;
 import com.jotaa.auditoria_espacios.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class UsuarioServiceRequest implements UsuarioService {
     private final UsuarioRepository usuarioRepo;
     private final PasswordEncoder encoder;
     private final UsuarioActual usuarioActual;
+    private final AuditoriaService auditoria;
 
     @Override
     @Transactional(readOnly = true)
@@ -50,6 +54,8 @@ public class UsuarioServiceRequest implements UsuarioService {
         u.setPasswordHash(req.password());
         u.setRol(req.rol());
         u.setActivo(true);
+        auditoria.registrar(Accion.CREAR, "usuario", u.getId(),
+                Map.of("correo", u.getCorreo(), "rol", u.getRol().name()));
         return UsuarioResponse.from(usuarioRepo.save(u));
     }
 
@@ -69,12 +75,15 @@ public class UsuarioServiceRequest implements UsuarioService {
         u.setCorreo(req.correo());
         u.setRol(req.rol());
         u.setActivo(req.activo());
+        auditoria.registrar(Accion.ACTUALIZAR, "usuario", id,
+                Map.of("correo", u.getCorreo(), "rol", u.getRol().name(), "activo", u.getActivo()));
         return UsuarioResponse.from(u);
     }
 
     @Override
     public void cambiarPassword(Long id, CambiarPasswordRequest req) {
         buscar(id).setPasswordHash(encoder.encode(req.password()));
+        auditoria.registrar(Accion.CAMBIAR_PASSWORD, "usuario", id, Map.of());
     }
 
     private Usuario buscar(Long id){

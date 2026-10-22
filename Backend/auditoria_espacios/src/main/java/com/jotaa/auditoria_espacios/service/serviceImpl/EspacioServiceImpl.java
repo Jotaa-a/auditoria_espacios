@@ -3,16 +3,19 @@ package com.jotaa.auditoria_espacios.service.serviceImpl;
 import com.jotaa.auditoria_espacios.dto.request.EspacioRequest;
 import com.jotaa.auditoria_espacios.dto.response.EspacioResponse;
 import com.jotaa.auditoria_espacios.entity.Espacio;
+import com.jotaa.auditoria_espacios.entity.enumerated.Accion;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.repository.EspacioRepository;
 import com.jotaa.auditoria_espacios.repository.UsuarioRepository;
+import com.jotaa.auditoria_espacios.service.AuditoriaService;
 import com.jotaa.auditoria_espacios.service.EspacioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class EspacioServiceImpl implements EspacioService {
 
     private final EspacioRepository espacioRepo;
     private final UsuarioRepository usuarioRepo;
+    private final AuditoriaService auditoria;
 
     @Override
     @Transactional(readOnly = true)
@@ -40,7 +44,9 @@ public class EspacioServiceImpl implements EspacioService {
             throw new ConflictoException("Ya existe un espacio con ese nombre");
         Espacio e = new Espacio();
         aplicar(e, req);
-        return EspacioResponse.from(espacioRepo.save(e));
+        Espacio g = espacioRepo.save(e);
+        auditoria.registrar(Accion.CREAR, "espacio", g.getId(), Map.of("nombre", g.getNombre()));
+        return EspacioResponse.from(g);
     }
 
     @Override
@@ -49,13 +55,19 @@ public class EspacioServiceImpl implements EspacioService {
         Espacio e = buscar(id);
         if (!e.getNombre().equals(req.nombre()) && espacioRepo.existsByNombre(req.nombre()))
             throw new ConflictoException("Ya existe un espacio con ese nombre");
+        String antes = e.getNombre();
         aplicar(e, req);
+        auditoria.registrar(Accion.ACTUALIZAR, "espacio", id,
+                Map.of("NombreAntes", antes, "nombreDespues", e.getNombre()));
         return EspacioResponse.from(e);
     }
 
     @Override
     public void eliminar(Long id) {
-        espacioRepo.delete(buscar(id));
+        Espacio e = buscar(id);
+        espacioRepo.delete(e);
+        auditoria.registrar(Accion.ELIMINAR, "espacio", id,
+                Map.of("nombre", e.getNombre()));
     }
 
     @Override

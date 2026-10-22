@@ -4,16 +4,19 @@ import com.jotaa.auditoria_espacios.dto.request.PuestoRequest;
 import com.jotaa.auditoria_espacios.dto.response.PuestoResponse;
 import com.jotaa.auditoria_espacios.entity.Espacio;
 import com.jotaa.auditoria_espacios.entity.PuestoTrabajo;
+import com.jotaa.auditoria_espacios.entity.enumerated.Accion;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
 import com.jotaa.auditoria_espacios.repository.EspacioRepository;
 import com.jotaa.auditoria_espacios.repository.PuestoTrabajoRepository;
+import com.jotaa.auditoria_espacios.service.AuditoriaService;
 import com.jotaa.auditoria_espacios.service.PuestoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class PuestoServiceImpl implements PuestoService {
 
     private final PuestoTrabajoRepository puestoRepo;
     private final EspacioRepository espacioRepo;
+    private final AuditoriaService auditoria;
 
     @Override
     @Transactional(readOnly = true)
@@ -44,6 +48,8 @@ public class PuestoServiceImpl implements PuestoService {
         p.setEspacio(buscarEspacio(req.espacioId()));
         p.setCodigo(req.codigo());
         p.setActivo(req.activo() == null || req.activo());
+        auditoria.registrar(Accion.CREAR, "puesto_trabajo", p.getId(),
+                Map.of("codigo", p.getCodigo(), "espacio_id", req.espacioId()));
         return PuestoResponse.from(puestoRepo.save(p));
     }
 
@@ -58,13 +64,17 @@ public class PuestoServiceImpl implements PuestoService {
         p.setEspacio(buscarEspacio(req.espacioId()));
         p.setCodigo(req.codigo());
         if(req.activo() != null) p.setActivo(req.activo());
+        auditoria.registrar(Accion.ACTUALIZAR, "puesto_trabajo", id,
+                Map.of("codigo", p.getCodigo(), "espacioId", req.espacioId(), "activo", p.getActivo()));
         return PuestoResponse.from(p);
     }
 
     @Override
     @Transactional
     public void desactivar(Long id) {
-        buscar(id).setActivo(false);
+        PuestoTrabajo p = buscar(id);
+        p.setActivo(false);
+        auditoria.registrar(Accion.DESACTIVAR, "puesto_trabajo", id, Map.of("codigo", p.getCodigo()));
     }
 
     @Override
