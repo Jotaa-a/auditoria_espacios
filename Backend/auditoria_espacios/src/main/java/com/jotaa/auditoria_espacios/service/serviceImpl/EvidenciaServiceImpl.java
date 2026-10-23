@@ -63,13 +63,17 @@ public class EvidenciaServiceImpl implements EvidenciaService {
     public EvidenciaResponse subirAHallazgo(Long hallazgoId, MultipartFile archivo) {
         Hallazgo h = hallazgoRepo.findById(hallazgoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Hallazgo no encontrado: " + hallazgoId));
+
         if (h.getDetalle().getInspeccion().getEstado() == EstadoInspeccion.CERRADA)
             throw new ConflictoException("La inspeccion está cerrada y no admite más evidencias");
+
         Evidencia e = new Evidencia();
         e.setHallazgo(h);
         e.setRutaArchivo(almacenar(archivo));
-        auditoria.registrar(Accion.SUBIR_EVIDENCIA, "hallazgo", hallazgoId, Map.of("evidenciaId", e.getId()));
-        return EvidenciaResponse.from(evidenciaRepo.save(e));
+
+        Evidencia g = evidenciaRepo.save(e);
+        auditoria.registrar(Accion.SUBIR_EVIDENCIA, "hallazgo", hallazgoId, Map.of("evidenciaId", g.getId()));
+        return EvidenciaResponse.from(g);
     }
 
     @Override
@@ -80,8 +84,10 @@ public class EvidenciaServiceImpl implements EvidenciaService {
         Evidencia e = new Evidencia();
         e.setReporte(r);
         e.setRutaArchivo(almacenar(archivo));
-        auditoria.registrar(Accion.SUBIR_EVIDENCIA, "reporte_dano", reporteId, Map.of("evidenciaId", e.getId()));
-        return EvidenciaResponse.from(evidenciaRepo.save(e));
+
+        Evidencia g = evidenciaRepo.save(e);
+        auditoria.registrar(Accion.SUBIR_EVIDENCIA, "reporte_dano", reporteId, Map.of("evidenciaId", g.getId()));
+        return EvidenciaResponse.from(g);
     }
 
     @Override

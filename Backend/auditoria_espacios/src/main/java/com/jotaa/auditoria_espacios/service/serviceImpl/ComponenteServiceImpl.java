@@ -39,15 +39,19 @@ public class ComponenteServiceImpl implements ComponenteService {
     }
 
     @Override
+    @Transactional
     public ComponenteResponse crear(ComponenteRequest req) {
         Componente c = new Componente();
         aplicar(c, req);
-        auditoria.registrar(Accion.CREAR, "componente", c.getId(),
-                Map.of("tipo", c.getTipo(), "puestoId", req.puestoId()));
-        return ComponenteResponse.from(componenteRepo.save(c));
+        Componente g = componenteRepo.save(c);
+        auditoria.registrar(Accion.CREAR, "componente", g.getId(),
+                Map.of("tipo", g.getTipo(), "puestoId", req.puestoId()));
+
+        return ComponenteResponse.from(g);
     }
 
     @Override
+    @Transactional
     public ComponenteResponse actualizar(Long id, ComponenteRequest req) {
         Componente c = buscar(id);
         aplicar(c, req);
@@ -57,6 +61,7 @@ public class ComponenteServiceImpl implements ComponenteService {
     }
 
     @Override
+    @Transactional
     public void eliminar(Long id) {
         Componente c = buscar(id);
         componenteRepo.delete(c);
@@ -66,7 +71,7 @@ public class ComponenteServiceImpl implements ComponenteService {
     @Override
     public Componente buscar(Long id) {
         return componenteRepo.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Puesto no encontrado; " + id));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Componente no encontrado; " + id));
     }
 
     @Override
@@ -76,6 +81,6 @@ public class ComponenteServiceImpl implements ComponenteService {
 
         c.setTipo(req.tipo());
         c.setSerial(req.serial());
-        c.setDescripcion(req.descipcion());
+        c.setDescripcion(req.descripcion());
     }
 }

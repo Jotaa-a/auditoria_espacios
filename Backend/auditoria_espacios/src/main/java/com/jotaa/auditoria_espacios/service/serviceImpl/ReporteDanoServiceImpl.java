@@ -30,7 +30,6 @@ public class ReporteDanoServiceImpl implements ReporteDanoService {
 
     private final ReporteDanoRepository reporteRepo;
     private final ComponenteRepository componenteRepo;
-    private final UsuarioRepository usuarioRepo;
     private final InspeccionRepository inspeccionRepo;
     private final EvidenciaRepository evidenciaRepo;
     private final UsuarioActual usuarioActual;
@@ -58,10 +57,12 @@ public class ReporteDanoServiceImpl implements ReporteDanoService {
         }
         r.setDescripcion(req.descripcion());
         r.setGravedad(req.gravedad());
-        auditoria.registrar(Accion.CREAR, "reporte_dano", r.getId(),
+
+        ReporteDano g = reporteRepo.save(r);
+        auditoria.registrar(Accion.CREAR, "reporte_dano", g.getId(),
                 Map.of("origen", "MANUAL", "componenteId", req.componenteId(), "gravedad", req.gravedad().name()));
 
-        return toResponse(reporteRepo.save(r));
+        return toResponse(g);
     }
     @Override
     @Transactional(readOnly = true)
@@ -70,15 +71,15 @@ public class ReporteDanoServiceImpl implements ReporteDanoService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional()
     public ReporteResponse cambiarEstado(Long id, EstadoReporte nuevo) {
         ReporteDano r = buscar(id);
         if(nuevo.ordinal() <= r.getEstado().ordinal())
             throw new ConflictoException("No se puede pasar de " + r.getEstado() + " a " + nuevo);
-        r.setEstado(nuevo);
-        if (nuevo == EstadoReporte.RESUELTO) r.setResueltoEn(LocalDateTime.now());
         EstadoReporte anterior = r.getEstado();
+        if (nuevo == EstadoReporte.RESUELTO) r.setResueltoEn(LocalDateTime.now());
         r.setEstado(nuevo);
+
         auditoria.registrar(Accion.CAMBIAR_ESTADO, "reporte_dano", id,
                 Map.of("de", anterior.name(), "a", nuevo.name()));
         return toResponse(r);
@@ -104,6 +105,7 @@ public class ReporteDanoServiceImpl implements ReporteDanoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ReporteResponse obtener(Long id) {
         return toResponse(buscar(id));
     }

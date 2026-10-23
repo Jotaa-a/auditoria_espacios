@@ -19,12 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class UsuarioServiceRequest implements UsuarioService {
+public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepo;
     private final PasswordEncoder encoder;
@@ -50,13 +49,14 @@ public class UsuarioServiceRequest implements UsuarioService {
             throw new ConflictoException("Ya existe un usuario con ese correo");
         Usuario u = new Usuario();
         u.setNombre(req.nombre());
-        u.setCorreo(req.correo());
-        u.setPasswordHash(req.password());
+        u.setCorreo(correo);
+        u.setPasswordHash(encoder.encode(req.password()));
         u.setRol(req.rol());
         u.setActivo(true);
-        auditoria.registrar(Accion.CREAR, "usuario", u.getId(),
-                Map.of("correo", u.getCorreo(), "rol", u.getRol().name()));
-        return UsuarioResponse.from(usuarioRepo.save(u));
+        Usuario g = usuarioRepo.save(u);
+        auditoria.registrar(Accion.CREAR, "usuario", g.getId(),
+                Map.of("correo", g.getCorreo(), "rol", g.getRol().name()));
+        return UsuarioResponse.from(g);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class UsuarioServiceRequest implements UsuarioService {
                     "No puedes desactivarte ni quitarte el rol de administrador a ti mismo"
             );
         u.setNombre(req.nombre());
-        u.setCorreo(req.correo());
+        u.setCorreo(correo);
         u.setRol(req.rol());
         u.setActivo(req.activo());
         auditoria.registrar(Accion.ACTUALIZAR, "usuario", id,
@@ -81,6 +81,7 @@ public class UsuarioServiceRequest implements UsuarioService {
     }
 
     @Override
+    @Transactional
     public void cambiarPassword(Long id, CambiarPasswordRequest req) {
         buscar(id).setPasswordHash(encoder.encode(req.password()));
         auditoria.registrar(Accion.CAMBIAR_PASSWORD, "usuario", id, Map.of());

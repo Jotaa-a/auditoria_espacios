@@ -34,7 +34,6 @@ public class InspeccionServiceImpl implements InspeccionService {
     private final EspacioRepository espacioRepo;
     private final PuestoTrabajoRepository puestoRepo;
     private final ComponenteRepository componenteRepo;
-    private final UsuarioRepository usuarioRepo;
     private final TipoHallazgoRepository tipoRepo;
     private final ReporteDanoRepository reporteRepo;
     private final EvidenciaRepository evidenciaRepo;
@@ -56,10 +55,12 @@ public class InspeccionServiceImpl implements InspeccionService {
         i.setTipo(req.tipo());
         i.setFecha(req.fecha());
         i.setObservaciones(req.observaciones());
-        auditoria.registrar(Accion.CREAR, "inspeccion", i.getId(),
+        Inspeccion g = inspeccionRepo.save(i);
+
+        auditoria.registrar(Accion.CREAR, "inspeccion", g.getId(),
                 Map.of("espacioId", req.espacioId(), "tipo", req.tipo().name(), "fecha", req.fecha().toString()));
 
-        return toResponse(inspeccionRepo.save(i), true);
+        return toResponse(g, true);
     }
 
     @Override
@@ -76,6 +77,7 @@ public class InspeccionServiceImpl implements InspeccionService {
     }
 
     @Override
+    @Transactional
     public DetalleResponse registrarPuesto(Long inspeccionId, Long puestoId, DetallePuestoRequest req) {
         Inspeccion insp = buscar(inspeccionId);
         exigirBorrador(insp);
@@ -111,7 +113,7 @@ public class InspeccionServiceImpl implements InspeccionService {
 
             if ("OTRO".equals(tipo.getCodigo())
                 && (hr.descripcion() == null || hr.descripcion().isBlank()))
-                    throw new SolicitudInvalidaException("El hallazgo de tipo OTRO requiere una descipcion");
+                    throw new SolicitudInvalidaException("El hallazgo de tipo OTRO requiere una descripcion");
 
             if (tipo.getCategoria() == Categoria.DANO_FISICO
                     && (hr.componenteId() == null || hr.gravedad() == null))

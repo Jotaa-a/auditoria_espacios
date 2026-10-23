@@ -8,6 +8,6 @@ public record ComponenteRequest(
         @NotNull Long puestoId,
         @NotNull TipoComponente tipo,
         @Size(max = 80) String serial,
-        @Size(max = 150) String descipcion
+        @Size(max = 150) String descripcion
         ) {
 }

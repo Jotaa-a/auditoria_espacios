@@ -58,11 +58,12 @@ public class EspacioServiceImpl implements EspacioService {
         String antes = e.getNombre();
         aplicar(e, req);
         auditoria.registrar(Accion.ACTUALIZAR, "espacio", id,
-                Map.of("NombreAntes", antes, "nombreDespues", e.getNombre()));
+                Map.of("nombreAntes", antes, "nombreDespues", e.getNombre()));
         return EspacioResponse.from(e);
     }
 
     @Override
+    @Transactional
     public void eliminar(Long id) {
         Espacio e = buscar(id);
         espacioRepo.delete(e);

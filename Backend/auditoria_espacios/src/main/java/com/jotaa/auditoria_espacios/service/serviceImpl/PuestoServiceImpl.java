@@ -35,6 +35,7 @@ public class PuestoServiceImpl implements PuestoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PuestoResponse obtener(Long id) {
         return PuestoResponse.from(buscar(id));
     }
@@ -48,9 +49,10 @@ public class PuestoServiceImpl implements PuestoService {
         p.setEspacio(buscarEspacio(req.espacioId()));
         p.setCodigo(req.codigo());
         p.setActivo(req.activo() == null || req.activo());
-        auditoria.registrar(Accion.CREAR, "puesto_trabajo", p.getId(),
-                Map.of("codigo", p.getCodigo(), "espacio_id", req.espacioId()));
-        return PuestoResponse.from(puestoRepo.save(p));
+        PuestoTrabajo g = puestoRepo.save(p);
+        auditoria.registrar(Accion.CREAR, "puesto_trabajo", g.getId(),
+                Map.of("codigo", g.getCodigo(), "espacioId", req.espacioId()));
+        return PuestoResponse.from(g);
     }
 
     @Override
