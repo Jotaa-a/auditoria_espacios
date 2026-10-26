@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-public class EvidenciaCOntroller {
+public class EvidenciaController {
 
     private final EvidenciaService service;
 

@@ -4,6 +4,9 @@ import RutaProtegida from './auth/RutaProtegida';
 import Layout from './components/Layout';
 import Pendiente from './components/Pendiente';
 import Login from './pages/Login';
+import Inspecciones from './pages/Inspecciones';
+import InspeccionDetalle from './pages/InspeccionDetalle';
+import Comparacion from './pages/Comparacion';
 
 function Inicio() {
   const { rol } = useAuth();
@@ -20,9 +23,11 @@ export default function App() {
       <Route element={<RutaProtegida><Layout /></RutaProtegida>}>
         <Route path="/" element={<Inicio />} />
         <Route path="/inspecciones" element={
-          <RutaProtegida roles={['ADMIN', 'TECNICO']}><Pendiente titulo="Inspecciones" /></RutaProtegida>} />
+          <RutaProtegida roles={['ADMIN', 'TECNICO']}><Inspecciones /></RutaProtegida>} />
+        <Route path="/inspecciones/:id" element={
+          <RutaProtegida roles={['ADMIN', 'TECNICO']}><InspeccionDetalle /></RutaProtegida>} />
         <Route path="/comparacion" element={
-          <RutaProtegida roles={TODOS}><Pendiente titulo="Comparación viernes vs. lunes" /></RutaProtegida>} />
+          <RutaProtegida roles={TODOS}><Comparacion /></RutaProtegida>} />
         <Route path="/reportes" element={
           <RutaProtegida roles={TODOS}><Pendiente titulo="Reportes de daño" /></RutaProtegida>} />
         <Route path="/admin" element={

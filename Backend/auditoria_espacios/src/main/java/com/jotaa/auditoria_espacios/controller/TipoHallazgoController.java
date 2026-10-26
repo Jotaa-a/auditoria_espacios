@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tipo-hallazgos")
+@RequestMapping("/api/tipos-hallazgo")
 @RequiredArgsConstructor
-public class TipoHallazgosController {
+public class TipoHallazgoController {
 
     private final TipoHallazgoRepository repo;
 
