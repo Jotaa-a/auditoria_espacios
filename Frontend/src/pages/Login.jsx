@@ -48,4 +48,17 @@ export default function Login() {
       </form>
     </div>
   );
+
+  return (
+    <div className="login">
+      <div className="login-marca">
+        <img src="/logos/campuslands.png" alt="Campuslands" width="64" height="64" />
+        <img src="/logos/prexxa.png" alt="Prexxa" width="64" height="64" />
+      </div>
+
+      <form className="tarjeta" onSubmit={enviar}>
+        {/* ...el contenido del formulario queda igual... */}
+      </form>
+    </div>
+  );
 }

@@ -17,7 +17,10 @@ export default function Layout() {
   return (
     <div className="app">
       <header className="encabezado">
-        <strong>Auditoría de espacios</strong>
+        <div className="marca">
+          <img src="/logos/prexxa.png" alt="Prexxa" />
+          <strong>Auditoría de espacios</strong>
+        </div>
         <div className="usuario">
           <span>{usuario.nombre} · {ETIQUETA_ROL[rol]}</span>
           <button className="btn btn-secundario" onClick={logout}>Salir</button>

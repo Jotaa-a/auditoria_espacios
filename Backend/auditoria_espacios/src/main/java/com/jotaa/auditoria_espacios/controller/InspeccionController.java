@@ -43,7 +43,7 @@ public class InspeccionController {
         return service.registrarPuesto(id, puestoId, req);
     }
 
-    @PostMapping("/{id}cerrar")
+    @PostMapping("/{id}/cerrar")
     public InspeccionResponse cerrar(@PathVariable Long id){
         return service.cerrar(id);
     }

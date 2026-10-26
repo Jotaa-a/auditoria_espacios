@@ -12,7 +12,7 @@ public record EvidenciaResponse(
     public static EvidenciaResponse from(Evidencia e){
         return new EvidenciaResponse(
                 e.getId(), e.getSubidaEn(),
-                "/api/evidencias" + e.getId() + "/archivo"
+                "/api/evidencias/" + e.getId() + "/archivo"
         );
     }
 }
