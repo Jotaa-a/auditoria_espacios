@@ -3,7 +3,8 @@ import { api } from '../api/client';
 import { CATEGORIA, GRAVEDAD, TIPO_COMPONENTE, claveHallazgo, reducirImagen } from '../utils/formato';
 import FotosHallazgo from './FotosHallazgo';
 
-const VACIO = { tipoId: '', componenteId: '', gravedad: '', descripcion: '' };
+// Usamos tipoHallazgoId de forma uniforme para que coincida con el backend
+const VACIO = { tipoHallazgoId: '', componenteId: '', gravedad: '', descripcion: '' };
 
 function Previa({ archivo, onQuitar }) {
   const [url] = useState(() => URL.createObjectURL(archivo));
@@ -20,16 +21,22 @@ export default function EditorPuesto({
   puesto, inspeccionId, detalle, tipos, componentes, onCerrar, onGuardado,
 }) {
   const dialogo = useRef(null);
+  
+  // Mapeo inicial tolerante que captura cualquier variante y lo asigna a tipoHallazgoId
   const [lista, setLista] = useState(() =>
-    (detalle?.hallazgos ?? []).map((h) => ({
-      clave: claveHallazgo(h.tipoHallazgoId, h.componenteId),
-      tipoId: h.tipoHallazgoId,
-      componenteId: h.componenteId,
-      gravedad: h.gravedad,
-      descripcion: h.descripcion ?? '',
-      hallazgoId: h.id,
-      fotos: [],
-    })));
+    (detalle?.hallazgos ?? []).map((h) => {
+      const tipoIdEncontrado = h.tipoHallazgoId ?? h.tipoId ?? h.tipo ?? h.tipoHallazgo?.id;
+      return {
+        clave: claveHallazgo(tipoIdEncontrado, h.componenteId),
+        tipoHallazgoId: tipoIdEncontrado,
+        componenteId: h.componenteId ?? h.componente?.id ?? null,
+        gravedad: h.gravedad ?? null,
+        descripcion: h.descripcion ?? '',
+        hallazgoId: h.id,
+        fotos: [],
+      };
+    }));
+
   const [form, setForm] = useState(VACIO);
   const [errorForm, setErrorForm] = useState('');
   const [error, setError] = useState('');
@@ -40,7 +47,8 @@ export default function EditorPuesto({
     if (d && !d.open) d.showModal();
   }, []);
 
-  const tipo = tipos.find((t) => String(t.id) === String(form.tipoId));
+  // Usamos form.tipoHallazgoId de manera coherente
+  const tipo = tipos.find((t) => String(t.id) === String(form.tipoHallazgoId));
   const esDano = tipo?.categoria === 'DANO_FISICO';
 
   const porCategoria = tipos.reduce((acc, t) => {
@@ -66,10 +74,13 @@ export default function EditorPuesto({
     if (lista.some((h) => h.clave === clave)) return setErrorForm('Ese hallazgo ya está en la lista');
 
     setLista([...lista, {
-      clave, tipoId: tipo.id, componenteId,
+      clave, 
+      tipoHallazgoId: tipo.id, // Guardamos directamente con el nombre del backend
+      componenteId,
       gravedad: esDano ? form.gravedad : null,
       descripcion: form.descripcion.trim(),
-      hallazgoId: null, fotos: [],
+      hallazgoId: null, 
+      fotos: [],
     }]);
     setForm(VACIO);
   }
@@ -90,23 +101,34 @@ export default function EditorPuesto({
     setError('');
     setGuardando(true);
     try {
-      const guardado = await api.put(`/api/inspecciones/${inspeccionId}/puestos/${puesto.id}`, {
+      // Estructura limpia que coincide exactamente con HallazgoRequest de Spring Boot
+      const payload = {
         resultado: 'CON_NOVEDADES',
         hallazgos: lista.map((h) => ({
-          tipoHallazgoId: h.tipoId,
-          componenteId: h.componenteId,
+          tipoHallazgoId: Number(h.tipoHallazgoId),
+          componenteId: h.componenteId ? Number(h.componenteId) : null,
           descripcion: h.descripcion || null,
-          gravedad: h.gravedad,
+          gravedad: h.gravedad || null,
         })),
-      });
+      };
 
-      const porClave = new Map(
-        guardado.hallazgos.map((h) => [claveHallazgo(h.tipoHallazgoId, h.componenteId), h]));
+      const guardado = await api.put(`/api/inspecciones/${inspeccionId}/puestos/${puesto.id}`, payload);
 
+      const hallazgosServidor = guardado?.hallazgos ?? [];
       let fallidas = 0;
-      for (const h of lista) {
-        const destino = porClave.get(h.clave);
-        for (const foto of h.fotos) {
+
+      for (let i = 0; i < lista.length; i++) {
+        const itemLocal = lista[i];
+        const destino = hallazgosServidor[i] || hallazgosServidor.find(
+          (hs) => Number(hs.tipoHallazgoId ?? hs.tipoId) === Number(itemLocal.tipoHallazgoId)
+        );
+
+        if (!destino || !destino.id) {
+          fallidas += itemLocal.fotos.length;
+          continue;
+        }
+
+        for (const foto of itemLocal.fotos) {
           try {
             const datos = new FormData();
             datos.append('archivo', await reducirImagen(foto));
@@ -116,6 +138,7 @@ export default function EditorPuesto({
           }
         }
       }
+
       onGuardado(fallidas
         ? `El puesto ${puesto.codigo} se guardó, pero ${fallidas} foto(s) no se pudieron subir. Ábrelo de nuevo para reintentar.`
         : '');
@@ -134,7 +157,7 @@ export default function EditorPuesto({
 
       {lista.map((h) => (
         <div className="item-hallazgo" key={h.clave}>
-          <strong>{nombreTipo(h.tipoId)}</strong>
+          <strong>{nombreTipo(h.tipoHallazgoId)}</strong>
           <p className="suave">
             {[nombreComp(h.componenteId), h.gravedad && `Gravedad: ${GRAVEDAD[h.gravedad]}`, h.descripcion]
               .filter(Boolean).join(' · ') || 'Todo el puesto'}
@@ -164,7 +187,8 @@ export default function EditorPuesto({
         <legend>Agregar hallazgo</legend>
 
         <label htmlFor="tipo">Qué pasó</label>
-        <select id="tipo" value={form.tipoId} onChange={(e) => setForm({ ...form, tipoId: e.target.value })}>
+        {/* Cambiado a form.tipoHallazgoId para sincronizar con el estado VACIO */}
+        <select id="tipo" value={form.tipoHallazgoId} onChange={(e) => setForm({ ...form, tipoHallazgoId: e.target.value })}>
           <option value="">Elige…</option>
           {Object.entries(porCategoria).map(([cat, items]) => (
             <optgroup key={cat} label={CATEGORIA[cat] ?? cat}>

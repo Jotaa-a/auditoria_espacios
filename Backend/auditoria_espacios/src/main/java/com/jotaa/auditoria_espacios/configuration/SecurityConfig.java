@@ -64,6 +64,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/reportes-dano").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/reportes-dano/*/estado").hasAnyRole("ADMIN", "TECNICO")
 
+                        .requestMatchers(HttpMethod.GET, "/api/evidencias/**").authenticated()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auditoria/**").hasRole("ADMIN")
                         // lo demás queda bloqueado
