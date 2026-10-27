@@ -10,7 +10,8 @@ export default function Admin() {
   
   // Estados para Espacios (incluyendo representanteId opcional)
   const [espacios, setEspacios] = useState([]);
-  const [formEspacio, setFormEspacio] = useState({ nombre: '', representanteId: '' });
+  const [formEspacio, setFormEspacio] = useState({ id: null, nombre: '', representanteId: '' });
+  const [editandoEspacioId, setEditandoEspacioId] = useState(null);
   
   // Estados para Tipos de Hallazgo
   const [tiposHallazgo, setTiposHallazgo] = useState([]);
@@ -69,8 +70,25 @@ export default function Admin() {
     }
   };
 
-  // Crear Espacio (enviando el representanteId correcto para el EspacioRequest)
-  const handleCrearEspacio = async (e) => {
+  // Seleccionar espacio para editar
+  const iniciarEdicionEspacio = (esp) => {
+    setEditandoEspacioId(esp.id);
+    setFormEspacio({
+      nombre: esp.nombre,
+      representanteId: esp.representanteId || ''
+    });
+    setError('');
+    setExito('');
+  };
+
+  // Cancelar edición
+  const cancelarEdicionEspacio = () => {
+    setEditandoEspacioId(null);
+    setFormEspacio({ nombre: '', representanteId: '' });
+  };
+
+  // Crear o Actualizar Espacio
+  const handleGuardarEspacio = async (e) => {
     e.preventDefault();
     setOcupado(true);
     setError('');
@@ -81,9 +99,18 @@ export default function Admin() {
         representanteId: formEspacio.representanteId ? Number(formEspacio.representanteId) : null
       };
 
-      await api.post('/api/espacios', payload);
-      setExito('Espacio creado exitosamente.');
+      if (editandoEspacioId) {
+        // Petición PUT para actualizar
+        await api.put(`/api/espacios/${editandoEspacioId}`, payload);
+        setExito('Espacio actualizado exitosamente.');
+      } else {
+        // Petición POST para crear
+        await api.post('/api/espacios', payload);
+        setExito('Espacio creado exitosamente.');
+      }
+
       setFormEspacio({ nombre: '', representanteId: '' });
+      setEditandoEspacioId(null);
       cargarDatos();
     } catch (err) {
       setError(err.message);
@@ -201,8 +228,8 @@ export default function Admin() {
       {/* SECCIÓN ESPACIOS */}
       {seccion === 'espacios' && (
         <div className="pila">
-          <form className="tarjeta" onSubmit={handleCrearEspacio}>
-            <h2>Registrar nuevo espacio o laboratorio</h2>
+          <form className="tarjeta" onSubmit={handleGuardarEspacio}>
+            <h2>{editandoEspacioId ? 'Editar espacio o laboratorio' : 'Registrar nuevo espacio o laboratorio'}</h2>
             
             <label>Nombre del espacio</label>
             <input
@@ -226,9 +253,20 @@ export default function Admin() {
               ))}
             </select>
 
-            <button className="btn btn-primario" disabled={ocupado} style={{ marginTop: '1rem' }}>
-              {ocupado ? 'Guardando...' : 'Crear Espacio'}
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+              <button className="btn btn-primario" disabled={ocupado}>
+                {ocupado ? 'Guardando...' : (editandoEspacioId ? 'Actualizar Espacio' : 'Crear Espacio')}
+              </button>
+              {editandoEspacioId && (
+                <button
+                  type="button"
+                  className="btn btn-secundario"
+                  onClick={cancelarEdicionEspacio}
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
           </form>
 
           <div className="tarjeta">
@@ -242,14 +280,23 @@ export default function Admin() {
                       Representante: {esp.representanteNombre || 'No asignado'}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn-secundario"
-                    style={{ color: 'red', borderColor: 'red' }}
-                    onClick={() => handleEliminarEspacio(esp.id)}
-                  >
-                    Eliminar
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secundario"
+                      onClick={() => iniciarEdicionEspacio(esp)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secundario"
+                      style={{ color: 'red', borderColor: 'red' }}
+                      onClick={() => handleEliminarEspacio(esp.id)}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
