@@ -9,6 +9,7 @@ import InspeccionDetalle from './pages/InspeccionDetalle';
 import Comparacion from './pages/Comparacion';
 import ReporteDanos from './pages/ReporteDanos';
 import Admin from './pages/Admin';
+import Auditoria from './pages/Auditoria';
 
 
 function Inicio() {
@@ -42,7 +43,7 @@ export default function App() {
           <RutaProtegida roles={['ADMIN']}><Admin /></RutaProtegida>} />
 
         <Route path="/auditoria" element={
-          <RutaProtegida roles={['ADMIN']}><Pendiente titulo="Auditoría" /></RutaProtegida>} />
+          <RutaProtegida roles={['ADMIN']}><Auditoria /></RutaProtegida>} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
