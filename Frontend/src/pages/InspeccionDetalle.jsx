@@ -62,6 +62,25 @@ export default function InspeccionDetalle() {
     }
   }
 
+  // NUEVA FUNCIÓN: Marcar todos los puestos como OK de un solo toque
+  async function marcarTodosOk() {
+    if (!window.confirm('¿Estás seguro de marcar todos los puestos de este espacio como OK? Se registrarán sin novedades.')) return;
+    setOcupado('todos');
+    setError('');
+    setAviso('');
+    try {
+      for (const p of puestos) {
+        await api.put(`/api/inspecciones/${id}/puestos/${p.id}`, { resultado: 'OK' });
+      }
+      await refrescar();
+      setAviso('¡Todos los puestos han sido marcados como OK exitosamente!');
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setOcupado(null);
+    }
+  }
+
   async function cerrar() {
     if (!window.confirm(
       'Al cerrar la inspección ya no podrás modificarla, y los daños físicos se enviarán como reportes. ¿Cerrarla?')) return;
@@ -100,9 +119,23 @@ export default function InspeccionDetalle() {
         </p>
         <label htmlFor="avance">Avance: {insp.puestosRegistrados} de {insp.puestosTotales} puestos</label>
         <progress id="avance" max={insp.puestosTotales} value={insp.puestosRegistrados} />
+
+        {/* Botón masivo para marcar todo OK si la inspección está abierta */}
+        {abierta && puestos.length > 0 && (
+          <div style={{ marginTop: '1rem' }}>
+            <button 
+              type="button" 
+              className="btn btn-secundario" 
+              disabled={ocupado === 'todos'}
+              onClick={marcarTodosOk}
+            >
+              {ocupado === 'todos' ? 'Marcando todo…' : '✓ Marcar todos los puestos como OK'}
+            </button>
+          </div>
+        )}
       </div>
 
-      {aviso && <p className="aviso" role="status">{aviso}</p>}
+      {aviso && <p className="aviso" role="status" style={{ color: 'green' }}>{aviso}</p>}
       {error && <p className="error" role="alert">{error}</p>}
 
       <ul className="lista">

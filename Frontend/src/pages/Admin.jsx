@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 
 export default function Admin() {
-  const [seccion, setSeccion] = useState('usuarios'); // 'usuarios', 'espacios', 'tipos'
+  const [seccion, setSeccion] = useState('usuarios'); // 'usuarios', 'espacios', 'puestos', 'tipos'
   
   // Estados para Usuarios y Representantes
   const [usuarios, setUsuarios] = useState([]);
@@ -12,6 +12,11 @@ export default function Admin() {
   const [espacios, setEspacios] = useState([]);
   const [formEspacio, setFormEspacio] = useState({ id: null, nombre: '', representanteId: '' });
   const [editandoEspacioId, setEditandoEspacioId] = useState(null);
+
+  // Estados para Puestos de Trabajo
+  const [puestos, setPuestos] = useState([]);
+  const [formPuesto, setFormPuesto] = useState({ espacioId: '', codigo: '' });
+  const [filtroEspacioPuesto, setFiltroEspacioPuesto] = useState('');
   
   // Estados para Tipos de Hallazgo
   const [tiposHallazgo, setTiposHallazgo] = useState([]);
@@ -23,7 +28,7 @@ export default function Admin() {
   // Cargar datos según la sección seleccionada
   useEffect(() => {
     cargarDatos();
-  }, [seccion]);
+  }, [seccion, filtroEspacioPuesto]);
 
   const cargarDatos = async () => {
     setError('');
@@ -33,13 +38,20 @@ export default function Admin() {
         const data = await api.get('/api/usuarios');
         setUsuarios(data);
       } else if (seccion === 'espacios') {
-        // Al entrar a espacios, cargamos tanto los espacios como los usuarios para obtener los representantes
         const [espaciosData, usuariosData] = await Promise.all([
           api.get('/api/espacios'),
           api.get('/api/usuarios')
         ]);
         setEspacios(espaciosData);
         setUsuarios(usuariosData);
+      } else if (seccion === 'puestos') {
+        // Al entrar a puestos, cargamos los espacios (para el select de creación y filtro) y los puestos
+        const [espaciosData, puestosData] = await Promise.all([
+          api.get('/api/espacios'),
+          api.get(filtroEspacioPuesto ? `/api/puestos?espacioId=${filtroEspacioPuesto}` : '/api/puestos')
+        ]);
+        setEspacios(espaciosData);
+        setPuestos(puestosData);
       } else if (seccion === 'tipos') {
         const data = await api.get('/api/tipos-hallazgo');
         setTiposHallazgo(data);
@@ -100,11 +112,9 @@ export default function Admin() {
       };
 
       if (editandoEspacioId) {
-        // Petición PUT para actualizar
         await api.put(`/api/espacios/${editandoEspacioId}`, payload);
         setExito('Espacio actualizado exitosamente.');
       } else {
-        // Petición POST para crear
         await api.post('/api/espacios', payload);
         setExito('Espacio creado exitosamente.');
       }
@@ -132,14 +142,49 @@ export default function Admin() {
     }
   };
 
+  // Crear Puesto de Trabajo (Conecta con PuestoRequest del backend)
+  const handleCrearPuesto = async (e) => {
+    e.preventDefault();
+    setOcupado(true);
+    setError('');
+    setExito('');
+    try {
+      await api.post('/api/puestos', {
+        espacioId: Number(formPuesto.espacioId),
+        codigo: formPuesto.codigo.trim(),
+        activo: true
+      });
+      setExito('Puesto de trabajo creado exitosamente.');
+      setFormPuesto({ espacioId: '', codigo: '' });
+      cargarDatos();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setOcupado(false);
+    }
+  };
+
+  // Desactivar Puesto de Trabajo
+  const handleDesactivarPuesto = async (id) => {
+    if (!window.confirm('¿Estás seguro de desactivar este puesto?')) return;
+    setError('');
+    try {
+      await api.delete(`/api/puestos/${id}`);
+      setExito('Puesto desactivado.');
+      cargarDatos();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   return (
     <section className="pila">
       <div className="tarjeta">
         <h1>Panel de Administración</h1>
-        <p className="suave">Gestiona los usuarios, espacios físicos y tipos de hallazgos de la universidad.</p>
+        <p className="suave">Gestiona los usuarios, espacios físicos, puestos de trabajo y tipos de hallazgos.</p>
 
-        {/* Sub-pestañas de administración */}
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+        {/* Sub-pestañas de administración actualizadas */}
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setSeccion('usuarios')}
             className={`btn ${seccion === 'usuarios' ? 'btn-primario' : 'btn-secundario'}`}
@@ -151,6 +196,12 @@ export default function Admin() {
             className={`btn ${seccion === 'espacios' ? 'btn-primario' : 'btn-secundario'}`}
           >
             Espacios y Aulas
+          </button>
+          <button
+            onClick={() => setSeccion('puestos')}
+            className={`btn ${seccion === 'puestos' ? 'btn-primario' : 'btn-secundario'}`}
+          >
+            Puestos de Trabajo
           </button>
           <button
             onClick={() => setSeccion('tipos')}
@@ -299,6 +350,88 @@ export default function Admin() {
                   </div>
                 </li>
               ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* SECCIÓN PUESTOS DE TRABAJO */}
+      {seccion === 'puestos' && (
+        <div className="pila">
+          <form className="tarjeta" onSubmit={handleCrearPuesto}>
+            <h2>Registrar nuevo puesto de trabajo</h2>
+            
+            <label>Espacio / Salón</label>
+            <select
+              required
+              value={formPuesto.espacioId}
+              onChange={(e) => setFormPuesto({ ...formPuesto, espacioId: e.target.value })}
+            >
+              <option value="">Selecciona un espacio...</option>
+              {espacios.map((esp) => (
+                <option key={esp.id} value={esp.id}>
+                  {esp.nombre}
+                </option>
+              ))}
+            </select>
+
+            <label>Código del puesto</label>
+            <input
+              type="text"
+              required
+              maxLength={30}
+              placeholder="Ej. SP_001"
+              value={formPuesto.codigo}
+              onChange={(e) => setFormPuesto({ ...formPuesto, codigo: e.target.value })}
+            />
+
+            <button className="btn btn-primario" disabled={ocupado} style={{ marginTop: '1rem' }}>
+              {ocupado ? 'Registrando...' : 'Crear Puesto'}
+            </button>
+          </form>
+
+          <div className="tarjeta">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <h2>Puestos existentes</h2>
+              <div>
+                <label style={{ marginRight: '0.5rem' }}>Filtrar por espacio:</label>
+                <select
+                  value={filtroEspacioPuesto}
+                  onChange={(e) => setFiltroEspacioPuesto(e.target.value)}
+                >
+                  <option value="">Todos los espacios</option>
+                  {espacios.map((esp) => (
+                    <option key={esp.id} value={esp.id}>
+                      {esp.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <ul className="lista" style={{ marginTop: '1rem' }}>
+              {puestos.length === 0 ? (
+                <p className="suave">No hay puestos registrados.</p>
+              ) : (
+                puestos.map((p) => (
+                  <li key={p.id} className="puesto-cab" style={{ padding: '0.5rem 0', borderBottom: '1px solid #f3f4f6' }}>
+                    <div>
+                      <strong>{p.codigo}</strong>
+                      <p className="suave">Estado: {p.activo ? '🟢 Activo' : '🔴 Inactivo'}</p>
+                    </div>
+                    {p.activo && (
+                      <button
+                        type="button"
+                        className="btn btn-secundario"
+                        style={{ color: 'red', borderColor: 'red' }}
+                        onClick={() => handleDesactivarPuesto(p.id)}
+                      >
+                        Desactivar
+                      </button>
+                    )}
+                  </li>
+                ))
+              )}
             </ul>
           </div>
         </div>
