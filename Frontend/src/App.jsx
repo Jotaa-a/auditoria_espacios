@@ -7,6 +7,9 @@ import Login from './pages/Login';
 import Inspecciones from './pages/Inspecciones';
 import InspeccionDetalle from './pages/InspeccionDetalle';
 import Comparacion from './pages/Comparacion';
+import ReporteDanos from './pages/ReporteDanos';
+import Admin from './pages/Admin';
+
 
 function Inicio() {
   const { rol } = useAuth();
@@ -22,16 +25,22 @@ export default function App() {
 
       <Route element={<RutaProtegida><Layout /></RutaProtegida>}>
         <Route path="/" element={<Inicio />} />
+
         <Route path="/inspecciones" element={
           <RutaProtegida roles={['ADMIN', 'TECNICO']}><Inspecciones /></RutaProtegida>} />
+
         <Route path="/inspecciones/:id" element={
           <RutaProtegida roles={['ADMIN', 'TECNICO']}><InspeccionDetalle /></RutaProtegida>} />
+
         <Route path="/comparacion" element={
           <RutaProtegida roles={TODOS}><Comparacion /></RutaProtegida>} />
+
         <Route path="/reportes" element={
-          <RutaProtegida roles={TODOS}><Pendiente titulo="Reportes de daño" /></RutaProtegida>} />
+          <RutaProtegida roles={TODOS}> <ReporteDanos /></RutaProtegida>} />
+
         <Route path="/admin" element={
-          <RutaProtegida roles={['ADMIN']}><Pendiente titulo="Administración" /></RutaProtegida>} />
+          <RutaProtegida roles={['ADMIN']}><Admin /></RutaProtegida>} />
+
         <Route path="/auditoria" element={
           <RutaProtegida roles={['ADMIN']}><Pendiente titulo="Auditoría" /></RutaProtegida>} />
       </Route>
