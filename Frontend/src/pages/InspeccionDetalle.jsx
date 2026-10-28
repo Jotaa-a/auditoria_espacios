@@ -15,6 +15,8 @@ export default function InspeccionDetalle() {
   const [ocupado, setOcupado] = useState(null);
   const [error, setError] = useState('');
   const [aviso, setAviso] = useState('');
+  const [descargando, setDescargando] = useState(false);
+  const [enviandoCorreo, setEnviandoCorreo] = useState(false);
 
   const refrescar = useCallback(async () => {
     setInsp(await api.get(`/api/inspecciones/${id}`));
@@ -62,7 +64,7 @@ export default function InspeccionDetalle() {
     }
   }
 
-  // NUEVA FUNCIÓN: Marcar todos los puestos como OK de un solo toque
+  // Marcar todos los puestos como OK de un solo toque
   async function marcarTodosOk() {
     if (!window.confirm('¿Estás seguro de marcar todos los puestos de este espacio como OK? Se registrarán sin novedades.')) return;
     setOcupado('todos');
@@ -78,6 +80,44 @@ export default function InspeccionDetalle() {
       setError(e.message);
     } finally {
       setOcupado(null);
+    }
+  }
+
+  // Descargar PDF usando el cliente api.descargar
+  async function handleDescargarPdf() {
+    setDescargando(true);
+    setError('');
+    try {
+      const blob = await api.descargar(`/api/inspecciones/${id}/pdf`);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Reporte_${insp.espacioNombre}_${insp.fecha}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      setError('No se pudo descargar el archivo PDF.');      
+    } finally {
+      setDescargando(false);
+    }
+  }
+
+  // Enviar reporte por correo
+  async function handleEnviarCorreo() {
+    const correo = window.prompt('Introduce el correo electrónico de destino:');
+    if (!correo || !correo.trim()) return;
+
+    setEnviandoCorreo(true);
+    setError('');
+    try {
+      await api.post(`/api/inspecciones/${id}/enviar-correo`, { correo: correo.trim() });
+      setAviso('El reporte ha sido enviado exitosamente al correo.');
+    } catch (e) {
+      setError('Error al enviar el correo electrónico.');
+    } finally {
+      setEnviandoCorreo(false);
     }
   }
 
@@ -120,19 +160,37 @@ export default function InspeccionDetalle() {
         <label htmlFor="avance">Avance: {insp.puestosRegistrados} de {insp.puestosTotales} puestos</label>
         <progress id="avance" max={insp.puestosTotales} value={insp.puestosRegistrados} />
 
-        {/* Botón masivo para marcar todo OK si la inspección está abierta */}
-        {abierta && puestos.length > 0 && (
-          <div style={{ marginTop: '1rem' }}>
+        {/* Botones de acción rápida: Marcar todos OK y Exportar/Enviar */}
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+          {abierta && puestos.length > 0 && (
             <button 
               type="button" 
               className="btn btn-secundario" 
               disabled={ocupado === 'todos'}
               onClick={marcarTodosOk}
             >
-              {ocupado === 'todos' ? 'Marcando todo…' : '✓ Marcar todos los puestos como OK'}
+              {ocupado === 'todos' ? 'Marcando todo…' : '✓ Marcar todos como OK'}
             </button>
-          </div>
-        )}
+          )}
+
+          <button 
+            type="button" 
+            className="btn btn-secundario" 
+            disabled={descargando}
+            onClick={handleDescargarPdf}
+          >
+            {descargando ? 'Generando PDF...' : '📄 Descargar PDF'}
+          </button>
+
+          <button 
+            type="button" 
+            className="btn btn-secundario" 
+            disabled={enviandoCorreo}
+            onClick={handleEnviarCorreo}
+          >
+            {enviandoCorreo ? 'Enviando...' : '✉️ Enviar por Correo'}
+          </button>
+        </div>
       </div>
 
       {aviso && <p className="aviso" role="status" style={{ color: 'green' }}>{aviso}</p>}

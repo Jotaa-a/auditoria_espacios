@@ -70,10 +70,22 @@ export const api = {
   patch: (ruta, body) => json(enviar(ruta, { method: 'PATCH', body })),
   del: (ruta) => json(enviar(ruta, { method: 'DELETE' })),
   subir: (ruta, formData) => json(enviar(ruta, { method: 'POST', formData })),
-  // Las fotos piden token, así que no se pueden usar con <img src>.
-  // Esto descarga la imagen y devuelve una URL temporal para mostrarla.
-  async imagen(ruta) {
+  
+  // Descargar archivo binario (PDFs, etc.) con el token correcto de la sesión
+  descargar: async (ruta) => {
+    const sesion = leerSesion();
+    const headers = {};
+    if (sesion?.token) headers.Authorization = `Bearer ${sesion.token}`;
+
+    const res = await fetch(`${BASE}${ruta}`, { headers });
+    if (!res.ok) throw new Error("Error al descargar el archivo");
+    return await res.blob();
+  },
+
+  // Obtener URL temporal para imágenes seguras
+  imagen: async (ruta) => {
     const r = await enviar(ruta);
     return URL.createObjectURL(await r.blob());
   },
 };
+
