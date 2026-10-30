@@ -54,7 +54,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/inspecciones/**").authenticated()
                         .requestMatchers("/api/inspecciones/**").hasAnyRole("ADMIN", "TECNICO")
 
-                        // evidencias
+                        // hallazgos y evidencias
                         .requestMatchers(HttpMethod.POST, "/api/hallazgos/*/evidencias").hasAnyRole("ADMIN", "TECNICO")
                         .requestMatchers(HttpMethod.GET, "/api/hallazgos/**", "/api/ecidencias/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/reportes-dano/*/evidencias").authenticated()
@@ -67,6 +67,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/evidencias/**").authenticated()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auditoria/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/puestos/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/puestos/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/puestos/**").hasAuthority("ROLE_ADMIN")
                         // lo demás queda bloqueado
                         .anyRequest().denyAll())
                 .oauth2ResourceServer(o -> o.jwt(j -> j.jwtAuthenticationConverter(convertidor())));

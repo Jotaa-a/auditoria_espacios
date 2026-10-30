@@ -9,6 +9,10 @@ export default function Admin() {
   const [usuarios, setUsuarios] = useState([]);
   const [formUsuario, setFormUsuario] = useState({ nombre: '', correo: '', password: '', rol: 'TECNICO' });
   
+  //Edidicion de usuarios
+  const [editandoUsuarioId, setEditandoUsuarioId] = useState(null);
+  const [formEditarUsuario, setFormEditarUsuario] = useState({nombre: '', correo: '', rol: 'TECNICO', activo:true});
+
   // Estados para Espacios (incluyendo representanteId opcional)
   const [espacios, setEspacios] = useState([]);
   const [formEspacio, setFormEspacio] = useState({ id: null, nombre: '', representanteId: '' });
@@ -25,6 +29,9 @@ export default function Admin() {
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
   const [ocupado, setOcupado] = useState(false);
+
+  
+
 
   // Cargar datos según la sección seleccionada
   useEffect(() => {
@@ -82,6 +89,64 @@ export default function Admin() {
     }
   };
 
+  // Edidicion usuario
+  const iniciarEdicionUsuario = (u) => {
+    setEditandoUsuarioId(u.id);
+    setFormEditarUsuario({
+      nombre: u.nombre,
+      correo: u.correo,
+      rol: u.rol,
+      activo: u.activo ?? true
+    });
+    setError('');
+    setExito('');
+  };
+
+  const cancelarEdicionUsuario = () => {
+    setEditandoUsuarioId(null);
+    setFormEditarUsuario({ nombre: '', correo: '', rol: 'TECNICO', activo: true });
+    setError('');
+    setExito('');
+  };
+
+  const handleActualizarUsuario = async (e) => {
+    e.preventDefautl();
+    setOcupado(true);
+    setError();
+    setExito();
+    try {
+      await api.put(`/api/usuarios/${editandoUsuarioId}`, formEditarUsuario);
+      setEditandoUsuarioId(null);
+      setFormEditarUsuario({nombre: '', correo: '', rol:'TECNICO', activo:true});
+      cargarDatos();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setOcupado(false);
+    }
+  };
+
+  const handleCambiarPassword = async () => {
+    if (!editandoUsuarioId) return;
+
+    const nuevaPassword = window.prompt(`Introduce la nueva contraseña (mínimo 8 caracteres) para ${formEditarUsuario.nombre}:`);
+    if (!nuevaPassword) return;
+
+    if (nuevaPassword.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+
+    setError('');
+    setExito('');
+    try {
+      await api.patch(`/api/usuarios/${editandoUsuarioId}/password`, { password: nuevaPassword });
+      setExito(`Contraseña de ${formEditarUsuario.nombre} actualizada exitosamente.`);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   // Seleccionar espacio para editar
   const iniciarEdicionEspacio = (esp) => {
     setEditandoEspacioId(esp.id);
@@ -134,7 +199,7 @@ export default function Admin() {
     if (!window.confirm('¿Estás seguro de eliminar este espacio?')) return;
     setError('');
     try {
-      await api.delete(`/api/espacios/${id}`);
+      await api.del(`/api/espacios/${id}`);
       setExito('Espacio eliminado.');
       cargarDatos();
     } catch (err) {
@@ -169,8 +234,23 @@ export default function Admin() {
     if (!window.confirm('¿Estás seguro de desactivar este puesto?')) return;
     setError('');
     try {
-      await api.delete(`/api/puestos/${id}`);
+      await api.del(`/api/puestos/${id}`);
       setExito('Puesto desactivado.');
+      cargarDatos();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleActivarPuesto = async (puesto) => {
+    setError('');
+    try {
+      await api.put(`/api/puestos/${puesto.id}`, {
+        espacioId: puesto.espacioId,
+        codigo: puesto.codigo,
+        activo: true
+      });
+      setExito('Puesto activado exitosamente');
       cargarDatos();
     } catch (err) {
       setError(err.message);
@@ -189,7 +269,7 @@ export default function Admin() {
             onClick={() => setSeccion('dashboard')}
             className={`btn ${seccion === 'dashboard' ? 'btn-primario' : 'btn-secundario'}`}
           >
-            📊 Estadísticas
+            Estadísticas
           </button>
           <button
             onClick={() => setSeccion('usuarios')}
@@ -227,47 +307,111 @@ export default function Admin() {
       {/* SECCIÓN USUARIOS */}
       {seccion === 'usuarios' && (
         <div className="pila">
-          <form className="tarjeta" onSubmit={handleCrearUsuario}>
-            <h2>Registrar nuevo usuario</h2>
-            
-            <label>Nombre completo</label>
-            <input
-              type="text"
-              required
-              value={formUsuario.nombre}
-              onChange={(e) => setFormUsuario({ ...formUsuario, nombre: e.target.value })}
-            />
+          {/* Formulario dinámico: Crea o Edita según el estado */}
+          {editandoUsuarioId ? (
+            <form className="tarjeta" onSubmit={handleActualizarUsuario}>
+              <h2>Editar usuario</h2>
+              
+              <label>Nombre completo</label>
+              <input
+                type="text"
+                required
+                value={formEditarUsuario.nombre}
+                onChange={(e) => setFormEditarUsuario({ ...formEditarUsuario, nombre: e.target.value })}
+              />
 
-            <label>Correo electrónico</label>
-            <input
-              type="email"
-              required
-              value={formUsuario.correo}
-              onChange={(e) => setFormUsuario({ ...formUsuario, correo: e.target.value })}
-            />
+              <label>Correo electrónico</label>
+              <input
+                type="email"
+                required
+                value={formEditarUsuario.correo}
+                onChange={(e) => setFormEditarUsuario({ ...formEditarUsuario, correo: e.target.value })}
+              />
 
-            <label>Contraseña temporal</label>
-            <input
-              type="password"
-              required
-              value={formUsuario.password}
-              onChange={(e) => setFormUsuario({ ...formUsuario, password: e.target.value })}
-            />
+              <label>Rol</label>
+              <select
+                value={formEditarUsuario.rol}
+                onChange={(e) => setFormEditarUsuario({ ...formEditarUsuario, rol: e.target.value })}
+              >
+                <option value="ADMIN">Administrador</option>
+                <option value="TECNICO">Técnico</option>
+                <option value="REPRESENTANTE">Representante</option>
+              </select>
 
-            <label>Rol</label>
-            <select
-              value={formUsuario.rol}
-              onChange={(e) => setFormUsuario({ ...formUsuario, rol: e.target.value })}
-            >
-              <option value="ADMIN">Administrador</option>
-              <option value="TECNICO">Técnico</option>
-              <option value="REPRESENTANTE">Representante</option>
-            </select>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={formEditarUsuario.activo}
+                  onChange={(e) => setFormEditarUsuario({ ...formEditarUsuario, activo: e.target.checked })}
+                />
+                Usuario activo
+              </label>
 
-            <button className="btn btn-primario" disabled={ocupado} style={{ marginTop: '1rem' }}>
-              {ocupado ? 'Registrando...' : 'Crear Usuario'}
-            </button>
-          </form>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                <button className="btn btn-primario" disabled={ocupado}>
+                  {ocupado ? 'Guardando...' : 'Actualizar Usuario'}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secundario"
+                  onClick={handleCambiarPassword}
+                >
+                  Cambiar Contraseña
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secundario"
+                  onClick={cancelarEdicionUsuario}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form className="tarjeta" onSubmit={handleCrearUsuario}>
+              <h2>Registrar nuevo usuario</h2>
+              
+              <label>Nombre completo</label>
+              <input
+                type="text"
+                required
+                value={formUsuario.nombre}
+                onChange={(e) => setFormUsuario({ ...formUsuario, nombre: e.target.value })}
+              />
+
+              <label>Correo electrónico</label>
+              <input
+                type="email"
+                required
+                value={formUsuario.correo}
+                onChange={(e) => setFormUsuario({ ...formUsuario, correo: e.target.value })}
+              />
+
+              <label>Contraseña temporal</label>
+              <input
+                type="password"
+                required
+                value={formUsuario.password}
+                onChange={(e) => setFormUsuario({ ...formUsuario, password: e.target.value })}
+              />
+
+              <label>Rol</label>
+              <select
+                value={formUsuario.rol}
+                onChange={(e) => setFormUsuario({ ...formUsuario, rol: e.target.value })}
+              >
+                <option value="ADMIN">Administrador</option>
+                <option value="TECNICO">Técnico</option>
+                <option value="REPRESENTANTE">Representante</option>
+              </select>
+
+              <button className="btn btn-primario" disabled={ocupado} style={{ marginTop: '1rem' }}>
+                {ocupado ? 'Registrando...' : 'Crear Usuario'}
+              </button>
+            </form>
+          )}
 
           <div className="tarjeta">
             <h2>Lista de usuarios registrados</h2>
@@ -276,8 +420,18 @@ export default function Admin() {
                 <li key={u.id} className="puesto-cab" style={{ padding: '0.5rem 0', borderBottom: '1px solid #f3f4f6' }}>
                   <div>
                     <strong>{u.nombre}</strong> <span className="suave">({u.correo})</span>
+                    <p className="suave">Estado: {u.activo !== false ? '🟢 Activo' : '🔴 Inactivo'}</p>
                   </div>
-                  <span className="insignia insignia-ok">{u.rol}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className="insignia insignia-ok">{u.rol}</span>
+                    <button
+                      type="button"
+                      className="btn btn-secundario"
+                      onClick={() => iniciarEdicionUsuario(u)}
+                    >
+                      Editar
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -428,7 +582,9 @@ export default function Admin() {
                       <strong>{p.codigo}</strong>
                       <p className="suave">Estado: {p.activo ? '🟢 Activo' : '🔴 Inactivo'}</p>
                     </div>
-                    {p.activo && (
+                    
+                    {/* Botón dinámico según el estado */}
+                    {p.activo ? (
                       <button
                         type="button"
                         className="btn btn-secundario"
@@ -436,6 +592,15 @@ export default function Admin() {
                         onClick={() => handleDesactivarPuesto(p.id)}
                       >
                         Desactivar
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn-secundario"
+                        style={{ color: 'green', borderColor: 'green' }}
+                        onClick={() => handleActivarPuesto(p)}
+                      >
+                        Activar
                       </button>
                     )}
                   </li>
