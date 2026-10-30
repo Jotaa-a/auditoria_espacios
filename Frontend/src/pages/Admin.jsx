@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
+import Dashboard from '../components/Dashboard'; 
 
 export default function Admin() {
-  const [seccion, setSeccion] = useState('usuarios'); // 'usuarios', 'espacios', 'puestos', 'tipos'
+  const [seccion, setSeccion] = useState('dashboard'); 
   
   // Estados para Usuarios y Representantes
   const [usuarios, setUsuarios] = useState([]);
@@ -45,7 +46,6 @@ export default function Admin() {
         setEspacios(espaciosData);
         setUsuarios(usuariosData);
       } else if (seccion === 'puestos') {
-        // Al entrar a puestos, cargamos los espacios (para el select de creación y filtro) y los puestos
         const [espaciosData, puestosData] = await Promise.all([
           api.get('/api/espacios'),
           api.get(filtroEspacioPuesto ? `/api/puestos?espacioId=${filtroEspacioPuesto}` : '/api/puestos')
@@ -142,7 +142,7 @@ export default function Admin() {
     }
   };
 
-  // Crear Puesto de Trabajo (Conecta con PuestoRequest del backend)
+  // Crear Puesto de Trabajo
   const handleCrearPuesto = async (e) => {
     e.preventDefault();
     setOcupado(true);
@@ -181,10 +181,16 @@ export default function Admin() {
     <section className="pila">
       <div className="tarjeta">
         <h1>Panel de Administración</h1>
-        <p className="suave">Gestiona los usuarios, espacios físicos, puestos de trabajo y tipos de hallazgos.</p>
+        <p className="suave">Gestiona las estadísticas, usuarios, espacios físicos, puestos de trabajo y tipos de hallazgos.</p>
 
         {/* Sub-pestañas de administración actualizadas */}
         <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setSeccion('dashboard')}
+            className={`btn ${seccion === 'dashboard' ? 'btn-primario' : 'btn-secundario'}`}
+          >
+            📊 Estadísticas
+          </button>
           <button
             onClick={() => setSeccion('usuarios')}
             className={`btn ${seccion === 'usuarios' ? 'btn-primario' : 'btn-secundario'}`}
@@ -214,6 +220,9 @@ export default function Admin() {
 
       {error && <p className="error" role="alert">{error}</p>}
       {exito && <p className="aviso" role="status" style={{ color: 'green' }}>{exito}</p>}
+
+      {/* SECCIÓN DASHBOARD / ESTADÍSTICAS */}
+      {seccion === 'dashboard' && <Dashboard />}
 
       {/* SECCIÓN USUARIOS */}
       {seccion === 'usuarios' && (
