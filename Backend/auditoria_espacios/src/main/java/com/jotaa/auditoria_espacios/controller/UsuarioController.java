@@ -1,5 +1,6 @@
 package com.jotaa.auditoria_espacios.controller;
 
+import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordPropiaRequest;
 import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordRequest;
 import com.jotaa.auditoria_espacios.dto.request.UsuarioActualizarRequest;
 import com.jotaa.auditoria_espacios.dto.request.UsuarioCrearRequest;
@@ -8,6 +9,8 @@ import com.jotaa.auditoria_espacios.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +21,21 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioService service;
+
+    @PatchMapping("/me/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cambiarMiPassword(
+            @Valid @RequestBody CambiarPasswordPropiaRequest req
+    ){
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No se encontró ina sesión autenticada válida");
+        }
+
+        Long usuarioId = Long.valueOf(authentication.getName());
+        service.cambiarPasswordPropia(usuarioId, req);
+    }
 
     @GetMapping
     public List<UsuarioResponse> listar(){ return service.listar(); }

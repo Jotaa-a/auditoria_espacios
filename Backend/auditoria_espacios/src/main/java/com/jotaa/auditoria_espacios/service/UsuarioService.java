@@ -1,5 +1,6 @@
 package com.jotaa.auditoria_espacios.service;
 
+import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordPropiaRequest;
 import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordRequest;
 import com.jotaa.auditoria_espacios.dto.request.UsuarioActualizarRequest;
 import com.jotaa.auditoria_espacios.dto.request.UsuarioCrearRequest;
@@ -13,4 +14,5 @@ public interface UsuarioService {
     UsuarioResponse crear(UsuarioCrearRequest req);
     UsuarioResponse actualizar(Long id, UsuarioActualizarRequest req);
     void cambiarPassword(Long id, CambiarPasswordRequest req);
+    void cambiarPasswordPropia(Long UsuarioId, CambiarPasswordPropiaRequest req);
 }

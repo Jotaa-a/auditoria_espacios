@@ -1,6 +1,7 @@
 package com.jotaa.auditoria_espacios.service.serviceImpl;
 
 import com.jotaa.auditoria_espacios.configuration.UsuarioActual;
+import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordPropiaRequest;
 import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordRequest;
 import com.jotaa.auditoria_espacios.dto.request.UsuarioActualizarRequest;
 import com.jotaa.auditoria_espacios.dto.request.UsuarioCrearRequest;
@@ -85,6 +86,20 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void cambiarPassword(Long id, CambiarPasswordRequest req) {
         buscar(id).setPasswordHash(encoder.encode(req.password()));
         auditoria.registrar(Accion.CAMBIAR_PASSWORD, "usuario", id, Map.of());
+    }
+
+    @Override
+    @Transactional
+    public void cambiarPasswordPropia(Long usuarioId, CambiarPasswordPropiaRequest req){
+        Usuario usuario = usuarioRepo.findById(usuarioId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+
+        if (!encoder.matches(req.passwordActual(), usuario.getPasswordHash())) {
+            throw new IllegalArgumentException("La contraseña actual es incorrecta");
+        }
+
+        usuario.setPasswordHash(encoder.encode(req.nuevaPassword()));
+        usuarioRepo.save(usuario);
     }
 
     private Usuario buscar(Long id){
