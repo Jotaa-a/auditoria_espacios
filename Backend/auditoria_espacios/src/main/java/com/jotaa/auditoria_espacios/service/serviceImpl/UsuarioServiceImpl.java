@@ -1,10 +1,7 @@
 package com.jotaa.auditoria_espacios.service.serviceImpl;
 
 import com.jotaa.auditoria_espacios.configuration.UsuarioActual;
-import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordPropiaRequest;
-import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordRequest;
-import com.jotaa.auditoria_espacios.dto.request.UsuarioActualizarRequest;
-import com.jotaa.auditoria_espacios.dto.request.UsuarioCrearRequest;
+import com.jotaa.auditoria_espacios.dto.request.*;
 import com.jotaa.auditoria_espacios.dto.response.UsuarioResponse;
 import com.jotaa.auditoria_espacios.entity.Usuario;
 import com.jotaa.auditoria_espacios.entity.enumerated.Accion;
@@ -18,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.mail.javamail.JavaMailSender;
 
 import java.util.List;
 import java.util.Map;
@@ -30,6 +28,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final PasswordEncoder encoder;
     private final UsuarioActual usuarioActual;
     private final AuditoriaService auditoria;
+    private final JavaMailSender mailSender;
 
     @Override
     @Transactional(readOnly = true)
@@ -102,6 +101,49 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioRepo.save(usuario);
     }
 
+    @Override
+    @Transactional
+    public void solicitarRecuperacionPassword(OlvidoPasswordRequest req){
+        Usuario usuario = usuarioRepo.findByCorreo(req.correo())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Correo no registrado"));
+
+        String token = java.util.UUID.randomUUID().toString();
+        usuario.setTokenRecuperacion(token);
+
+        usuario.setExpiracionToken(java.time.LocalDateTime.now().plusHours(1));
+        usuarioRepo.save(usuario);
+
+        try {
+            org.springframework.mail.SimpleMailMessage mensaje = new org.springframework.mail.SimpleMailMessage();
+            mensaje.setFrom("jmantillavillalba208@gmail.com");
+            mensaje.setTo(usuario.getCorreo());
+            mensaje.setSubject("Recuperación de contraseña - Auditoria de Espacios");
+            mensaje.setText("Hola" + usuario.getNombre() + ", \n\n" +
+                    "Has solicitado restablecer tu contraseña. Utiliza el siguiente token de recuperacion:\n\n" +
+                    token + "\n\n" +
+                    "Este token expira en 1 hora. \n\n" +
+                    "si tú no solicitaste esto, puedes ignorar este mensaje.");
+            mailSender.send(mensaje);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al enviar el correo de recuperación: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void restablecerPasswordConToken(RestablecerPasswordTokenRequest req) {
+        Usuario usuario = usuarioRepo.findByTokenRecuperacion(req.token())
+                .orElseThrow(() -> new IllegalArgumentException("Token inválido o expirado"));
+
+        if (usuario.getExpiracionToken() == null || usuario.getExpiracionToken().isBefore(java.time.LocalDateTime.now())) {
+            throw new IllegalArgumentException("El token de recuperacion ha expirado");
+        }
+
+        usuario.setPasswordHash(encoder.encode(req.nuevaPassword()));
+        usuario.setTokenRecuperacion(null);
+        usuario.setExpiracionToken(null);
+        usuarioRepo.save(usuario);
+    }
     private Usuario buscar(Long id){
         return usuarioRepo.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado: " + id));

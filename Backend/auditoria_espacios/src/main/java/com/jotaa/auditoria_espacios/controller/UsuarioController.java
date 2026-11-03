@@ -1,9 +1,6 @@
 package com.jotaa.auditoria_espacios.controller;
 
-import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordPropiaRequest;
-import com.jotaa.auditoria_espacios.dto.request.CambiarPasswordRequest;
-import com.jotaa.auditoria_espacios.dto.request.UsuarioActualizarRequest;
-import com.jotaa.auditoria_espacios.dto.request.UsuarioCrearRequest;
+import com.jotaa.auditoria_espacios.dto.request.*;
 import com.jotaa.auditoria_espacios.dto.response.UsuarioResponse;
 import com.jotaa.auditoria_espacios.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -35,6 +32,22 @@ public class UsuarioController {
 
         Long usuarioId = Long.valueOf(authentication.getName());
         service.cambiarPasswordPropia(usuarioId, req);
+    }
+
+    @PostMapping("/forgot-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void solicitarRecuperacion(
+            @Valid @RequestBody OlvidoPasswordRequest req
+            ){
+        service.solicitarRecuperacionPassword(req);
+    }
+
+    @PostMapping("/reset-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void rstablecerPassword(
+            @Valid @RequestBody RestablecerPasswordTokenRequest req
+    ){
+        service.restablecerPasswordConToken(req);
     }
 
     @GetMapping
