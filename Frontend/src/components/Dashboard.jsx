@@ -12,8 +12,6 @@ export default function Dashboard() {
 
   async function cargarEstadisticas() {
     try {
-      // Opcional: Puedes crear un endpoint en el backend que agrupe esto, 
-      // o calcularlo consumiendo los datos generales que ya tienes:
       const [espacios, puestos, inspecciones, tipos] = await Promise.all([
         api.get('/api/espacios'),
         api.get('/api/puestos'),

@@ -30,9 +30,6 @@ export default function Admin() {
   const [exito, setExito] = useState('');
   const [ocupado, setOcupado] = useState(false);
 
-  
-
-
   // Cargar datos según la sección seleccionada
   useEffect(() => {
     cargarDatos();
@@ -295,6 +292,7 @@ export default function Admin() {
           >
             Tipos de Hallazgo
           </button>
+
         </div>
       </div>
 
@@ -350,14 +348,6 @@ export default function Admin() {
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
                 <button className="btn btn-primario" disabled={ocupado}>
                   {ocupado ? 'Guardando...' : 'Actualizar Usuario'}
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn-secundario"
-                  onClick={handleCambiarPassword}
-                >
-                  Cambiar Contraseña
                 </button>
 
                 <button

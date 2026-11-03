@@ -7,6 +7,7 @@ const MENU = [
   { ruta: '/reportes', texto: 'Daños', roles: ['ADMIN', 'TECNICO', 'REPRESENTANTE'] },
   { ruta: '/admin', texto: 'Admin', roles: ['ADMIN'] },
   { ruta: '/auditoria', texto: 'Auditoría', roles: ['ADMIN'] },
+  { ruta: '/mi-password', texto: 'Mi Contraseña', roles: ['ADMIN', 'TECNICO', 'REPRESENTANTE'] }, 
 ];
 
 const ETIQUETA_ROL = { ADMIN: 'Administrador', TECNICO: 'Técnico', REPRESENTANTE: 'Representante' };

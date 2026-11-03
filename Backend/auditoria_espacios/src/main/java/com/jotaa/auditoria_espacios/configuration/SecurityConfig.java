@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/me").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/usuarios/me/password").authenticated()
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
 
                         // catálogos: todos pueden consultar, solo admin modifica
@@ -56,7 +57,7 @@ public class SecurityConfig {
 
                         // hallazgos y evidencias
                         .requestMatchers(HttpMethod.POST, "/api/hallazgos/*/evidencias").hasAnyRole("ADMIN", "TECNICO")
-                        .requestMatchers(HttpMethod.GET, "/api/hallazgos/**", "/api/ecidencias/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/hallazgos/**", "/api/evidencias/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/reportes-dano/*/evidencias").authenticated()
 
                         // reportes de daño

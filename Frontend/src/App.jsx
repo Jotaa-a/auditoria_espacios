@@ -10,6 +10,7 @@ import Comparacion from './pages/Comparacion';
 import ReporteDanos from './pages/ReporteDanos';
 import Admin from './pages/Admin';
 import Auditoria from './pages/Auditoria';
+import CambiarPassword from './components/CambiarPassword';
 
 
 function Inicio() {
@@ -26,6 +27,7 @@ export default function App() {
 
       <Route element={<RutaProtegida><Layout /></RutaProtegida>}>
         <Route path="/" element={<Inicio />} />
+        <Route path="/mi-password" element={<CambiarPassword />} />
 
         <Route path="/inspecciones" element={
           <RutaProtegida roles={['ADMIN', 'TECNICO']}><Inspecciones /></RutaProtegida>} />
@@ -44,7 +46,9 @@ export default function App() {
 
         <Route path="/auditoria" element={
           <RutaProtegida roles={['ADMIN']}><Auditoria /></RutaProtegida>} />
-      </Route>
+        </Route>
+
+        
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
