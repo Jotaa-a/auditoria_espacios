@@ -9,7 +9,7 @@ public class AuditoriaEspaciosApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AuditoriaEspaciosApplication.class, args);
 		System.out.println("""
-				_________________________________
+				 _______________________________
 				|								|
 				|		Auditoria Espacios		| 
 				|		 Backend iniciado		|

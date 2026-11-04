@@ -11,6 +11,8 @@ import ReporteDanos from './pages/ReporteDanos';
 import Admin from './pages/Admin';
 import Auditoria from './pages/Auditoria';
 import CambiarPassword from './components/CambiarPassword';
+import OlvidoPassword from './components/OlvidoPassword';
+import RestablecerPassword from './components/RestablecerPassword';
 
 
 function Inicio() {
@@ -47,9 +49,10 @@ export default function App() {
         <Route path="/auditoria" element={
           <RutaProtegida roles={['ADMIN']}><Auditoria /></RutaProtegida>} />
         </Route>
-
         
-
+        <Route path="/forgot-password" element={<OlvidoPassword />} />
+        
+        <Route path="/reset-password" element={<RestablecerPassword />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

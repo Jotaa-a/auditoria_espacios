@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+
 
 export default function Login() {
   const { autenticado, login } = useAuth();
@@ -45,6 +46,12 @@ export default function Login() {
         <button className="btn btn-primario" disabled={cargando}>
           {cargando ? 'Entrando…' : 'Entrar'}
         </button>
+
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <Link to="/forgot-password" style={{ color: 'var(--color-primario, #2563eb)', textDecoration: 'underline', fontSize: '0.9rem' }}>
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
       </form>
     </div>
   );

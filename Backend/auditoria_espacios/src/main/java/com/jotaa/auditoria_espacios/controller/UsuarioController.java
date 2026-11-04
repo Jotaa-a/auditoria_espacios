@@ -44,7 +44,7 @@ public class UsuarioController {
 
     @PostMapping("/reset-password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void rstablecerPassword(
+    public void restablecerPassword(
             @Valid @RequestBody RestablecerPasswordTokenRequest req
     ){
         service.restablecerPasswordConToken(req);

@@ -101,6 +101,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioRepo.save(usuario);
     }
 
+    @org.springframework.beans.factory.annotation.Value("${MAIL_REMITENTE}")
+    private String mailRemitente;
+
     @Override
     @Transactional
     public void solicitarRecuperacionPassword(OlvidoPasswordRequest req){
@@ -115,7 +118,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         try {
             org.springframework.mail.SimpleMailMessage mensaje = new org.springframework.mail.SimpleMailMessage();
-            mensaje.setFrom("jmantillavillalba208@gmail.com");
+            mensaje.setFrom(mailRemitente);
             mensaje.setTo(usuario.getCorreo());
             mensaje.setSubject("Recuperación de contraseña - Auditoria de Espacios");
             mensaje.setText("Hola" + usuario.getNombre() + ", \n\n" +
@@ -132,6 +135,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public void restablecerPasswordConToken(RestablecerPasswordTokenRequest req) {
+
+        System.out.println("token:");
+        System.out.println(req.token());
+        System.out.println("-----------------");
         Usuario usuario = usuarioRepo.findByTokenRecuperacion(req.token())
                 .orElseThrow(() -> new IllegalArgumentException("Token inválido o expirado"));
 

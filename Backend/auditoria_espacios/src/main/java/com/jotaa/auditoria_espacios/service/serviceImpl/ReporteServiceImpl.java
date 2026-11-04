@@ -64,6 +64,8 @@ public class ReporteServiceImpl implements ReporteService {
         return out.toByteArray();
     }
 
+    @org.springframework.beans.factory.annotation.Value("S{MAIL_REMITENTE}")
+    private String mailRemitente;
     @Override
     public void enviarReportePorCorreo(Long inspeccionId, String correoDestino) {
         byte[] pdfBytes = generarPdfInspeccion(inspeccionId);
@@ -73,7 +75,7 @@ public class ReporteServiceImpl implements ReporteService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom("jmantillavillalba208@gmail.com");
+            helper.setFrom(mailRemitente);
             helper.setTo(correoDestino);
             helper.setSubject("Reporte de Inspección: " + insp.espacioNombre() + " (" + insp.fecha() + ")");
             helper.setText("Adjunto encontrarás el reporte detallado correspondiente a la inspección del espacio " + insp.espacioNombre() + ".");
