@@ -1,46 +1,47 @@
-:root {
-  --navy: #0B0B2E;
-  --naranja: #EA6506;
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-  --fondo: #F4F5F8;
+:root {
+  --navy: #0f172a;
+  --naranja: #3b82f6;
+
+  --fondo: #f8fafc;
   --tarjeta: #FFFFFF;
   --campo: #FFFFFF;
-  --texto: #0B0B2E;
-  --suave: #5A5C66;
-  --borde: #D9DAE2;
-  --borde-campo: #8A8CA0;
+  --texto: #1e293b;
+  --suave: #64748b;
+  --borde: #e2e8f0;
+  --borde-campo: #cbd5e1;
 
   --primario: var(--naranja);
-  --primario-texto: var(--navy);
-  --acento: #B54A00;      /* naranja para texto y enlaces */
-  --ok: #1E7A46;
-  --alerta: #B54A00;
-  --peligro: #C62828;
+  --primario-texto: #ffffff;
+  --acento: #2563eb;      /* naranja para texto y enlaces */
+  --ok: #059669;
+  --alerta: #d97706;
+  --peligro: #dc2626;
 
   --encabezado: var(--navy);
   --encabezado-texto: #FFFFFF;
-  --encabezado-suave: #C9CBE0;
+  --encabezado-suave: #94a3b8;
 
-  color-scheme: light dark;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--texto);
   background: var(--fondo);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --fondo: #05050E;
-    --tarjeta: #0B0B26;
-    --campo: #05050E;
-    --texto: #F2F3FA;
-    --suave: #A3A6BC;
-    --borde: #23244A;
-    --borde-campo: #5A5D85;
+    --fondo: #090d16;
+    --tarjeta: #0f172a;
+    --campo: #090d16;
+    --texto: #f1f5f9;
+    --suave: #94a3b8;
+    --borde: #1e293b;
+    --borde-campo: #334155;
 
-    --acento: #FF8A3D;
-    --ok: #4CC47E;
-    --alerta: #FF8A3D;
-    --peligro: #FF7B72;
+    --acento: #60a5fa;
+    --ok: #34d399;
+    --alerta: #fbbf24;
+    --peligro: #f87171;
   }
 }
 
@@ -89,6 +90,17 @@ a.enlace { display: block; color: inherit; text-decoration: none; }
 }
 
 /* ---------- componentes base ---------- */
+
+body { 
+  margin: 0; 
+  min-height: 100vh;
+  font-family: inherit;
+}
+
+input, select, textarea, button {
+  font-family: inherit;
+}
+
 .tarjeta {
   background: var(--tarjeta); border: 1px solid var(--borde);
   border-radius: 12px; padding: 1.25rem;
