@@ -15,6 +15,7 @@ import OlvidoPassword from './components/OlvidoPassword';
 import RestablecerPassword from './components/RestablecerPassword';
 
 
+
 function Inicio() {
   const { rol } = useAuth();
   return <Navigate to={rol === 'REPRESENTANTE' ? '/reportes' : '/inspecciones'} replace />;

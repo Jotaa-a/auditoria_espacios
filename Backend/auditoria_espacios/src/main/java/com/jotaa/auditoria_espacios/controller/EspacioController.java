@@ -5,8 +5,11 @@ import com.jotaa.auditoria_espacios.dto.response.EspacioResponse;
 import com.jotaa.auditoria_espacios.service.EspacioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -14,7 +17,24 @@ import java.util.List;
 @RequestMapping("/api/espacios")
 @RequiredArgsConstructor
 public class EspacioController {
+    @Autowired
     private final EspacioService service;
+
+
+    @PostMapping("/carga-masiva")
+    public ResponseEntity<?> cargarExel(@RequestParam("file")MultipartFile file){
+        if (file.isEmpty()){
+            return ResponseEntity.badRequest().body("Por favor, sube un archivo válido.");
+        }
+
+        try {
+            int registroCreados = service.procesarExel(file);
+            return ResponseEntity.ok("Se importaron exitosamente " + registroCreados + " espacios");
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al procesas el archivo: " + e.getMessage());
+        }
+    }
 
     @GetMapping
     public List<EspacioResponse> listar() {

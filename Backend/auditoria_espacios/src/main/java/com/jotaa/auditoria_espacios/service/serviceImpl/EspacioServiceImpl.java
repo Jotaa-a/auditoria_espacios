@@ -3,6 +3,7 @@ package com.jotaa.auditoria_espacios.service.serviceImpl;
 import com.jotaa.auditoria_espacios.dto.request.EspacioRequest;
 import com.jotaa.auditoria_espacios.dto.response.EspacioResponse;
 import com.jotaa.auditoria_espacios.entity.Espacio;
+import com.jotaa.auditoria_espacios.entity.Usuario;
 import com.jotaa.auditoria_espacios.entity.enumerated.Accion;
 import com.jotaa.auditoria_espacios.exception.ConflictoException;
 import com.jotaa.auditoria_espacios.exception.RecursoNoEncontradoException;
@@ -11,9 +12,14 @@ import com.jotaa.auditoria_espacios.repository.UsuarioRepository;
 import com.jotaa.auditoria_espacios.service.AuditoriaService;
 import com.jotaa.auditoria_espacios.service.EspacioService;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -88,5 +94,52 @@ public class EspacioServiceImpl implements EspacioService {
                             "Usuario no encontrado: " + req.representanteId()
                     )));
         }
+    }
+
+    @Override
+    public int procesarExel(MultipartFile file) throws IOException {
+        int contador = 0;
+        try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)){
+            Sheet sheet = workbook.getSheetAt(0);
+
+            for (int i = 1; i <= sheet.getLastRowNum(); i++){
+                Row row = sheet.getRow(i);
+                if(row == null) continue;
+
+                Cell cellNombre = row.getCell(0);
+                if(cellNombre == null) continue;
+                String nombre = cellNombre.getStringCellValue().trim();
+
+                Cell cellRepresentante = row.getCell(1);
+                if (cellRepresentante == null) continue;
+
+                Long idRepresentante = obtenerLongDeCelda(cellRepresentante);
+                if(idRepresentante == null) continue;
+
+                Usuario representante = usuarioRepo.findById(idRepresentante).orElse(null);
+
+                Espacio espacio = new Espacio();
+                espacio.setNombre(nombre);
+                espacio.setRepresentante(representante);
+
+                espacioRepo.save(espacio);
+                contador++;
+            }
+        }
+        return contador;
+    }
+
+    private Long obtenerLongDeCelda(Cell cell){
+        if (cell.getCellType() == CellType.NUMERIC){
+            return (long) cell.getNumericCellValue();
+        } else if (cell.getCellType() == CellType.STRING) {
+            try {
+                return Long.parseLong(cell.getStringCellValue().trim());
+            } catch(NumberFormatException e){
+                return null;
+            }
+        }
+
+        return null;
     }
 }

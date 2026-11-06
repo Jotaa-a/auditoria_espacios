@@ -1,3 +1,4 @@
+import CargaMasivaEspacios from '../components/CargaMasivaEspacios';
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import Dashboard from '../components/Dashboard'; 
@@ -472,6 +473,8 @@ export default function Admin() {
               )}
             </div>
           </form>
+
+          <CargaMasivaEspacios />
 
           <div className="tarjeta">
             <h2>Espacios existentes</h2>
